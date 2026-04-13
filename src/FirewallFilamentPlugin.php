@@ -5,6 +5,7 @@ namespace Magentron\LaravelFirewallFilament;
 use Closure;
 use Filament\Contracts\Plugin;
 use Filament\Panel;
+use Magentron\LaravelFirewallFilament\Pages\FirewallSettingsPage;
 use Magentron\LaravelFirewallFilament\Pages\FirewallStatusPage;
 use Magentron\LaravelFirewallFilament\Resources\FirewallRuleResource;
 use Magentron\LaravelFirewallFilament\Widgets\RecentLogLinesWidget;
@@ -60,7 +61,7 @@ class FirewallFilamentPlugin implements Plugin
         }
 
         if ($this->enableSettings) {
-            // Settings page will be registered in future stories
+            $pages[] = FirewallSettingsPage::class;
         }
 
         if ($this->enableLogs) {

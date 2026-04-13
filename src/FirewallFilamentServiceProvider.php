@@ -9,6 +9,7 @@ use Magentron\LaravelFirewallFilament\Adapters\LaravelLogFileAdapter;
 use Magentron\LaravelFirewallFilament\Adapters\LogSourceAdapter;
 use Magentron\LaravelFirewallFilament\Adapters\NullLogSourceAdapter;
 use Magentron\LaravelFirewallFilament\Adapters\RuleStoreAdapter;
+use Magentron\LaravelFirewallFilament\Support\SettingsStore;
 
 class FirewallFilamentServiceProvider extends ServiceProvider
 {
@@ -18,6 +19,15 @@ class FirewallFilamentServiceProvider extends ServiceProvider
             __DIR__ . '/../config/firewall-filament.php',
             'firewall-filament'
         );
+
+        $this->app->singleton(SettingsStore::class, function () {
+            $settingsFile = config('firewall-filament.settings_file')
+                ?? storage_path('app/firewall-filament-settings.json');
+            $snapshotDir = config('firewall-filament.settings_snapshot_dir')
+                ?? storage_path('app/firewall-filament-snapshots');
+
+            return new SettingsStore($settingsFile, $snapshotDir);
+        });
 
         $this->app->bind(RuleStoreAdapter::class, function () {
             return config('firewall.use_database')
@@ -40,6 +50,8 @@ class FirewallFilamentServiceProvider extends ServiceProvider
     {
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'firewall-filament');
 
+        $this->mergeFirewallSettings();
+
         if ($this->app->runningInConsole()) {
             $this->publishes([
                 __DIR__ . '/../config/firewall-filament.php' => config_path('firewall-filament.php'),
@@ -48,6 +60,16 @@ class FirewallFilamentServiceProvider extends ServiceProvider
             $this->publishes([
                 __DIR__ . '/../resources/views' => resource_path('views/vendor/firewall-filament'),
             ], 'firewall-filament-views');
+        }
+    }
+
+    private function mergeFirewallSettings(): void
+    {
+        $store = $this->app->make(SettingsStore::class);
+        $settings = $store->get();
+
+        foreach ($settings as $key => $value) {
+            config([$key => $value]);
         }
     }
 }
