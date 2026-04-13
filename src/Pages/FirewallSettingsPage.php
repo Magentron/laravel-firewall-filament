@@ -13,6 +13,7 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Magentron\LaravelFirewallFilament\Events\FirewallSettingsChanged;
 use Magentron\LaravelFirewallFilament\FirewallFilamentPlugin;
+use Magentron\LaravelFirewallFilament\Support\AuditLogger;
 use Magentron\LaravelFirewallFilament\Support\SettingsStore;
 
 class FirewallSettingsPage extends Page implements HasForms
@@ -107,6 +108,8 @@ class FirewallSettingsPage extends Page implements HasForms
 
         event(new FirewallSettingsChanged($settings, $previous));
 
+        $this->auditLog('settings_change', null, $previous, $settings);
+
         Notification::make()
             ->title('Settings saved')
             ->success()
@@ -132,6 +135,8 @@ class FirewallSettingsPage extends Page implements HasForms
             ]);
 
             event(new FirewallSettingsChanged($restored, $previous));
+
+            $this->auditLog('settings_restore', $snapshotId, $previous, $restored);
 
             Notification::make()
                 ->title('Settings restored')
@@ -160,6 +165,23 @@ class FirewallSettingsPage extends Page implements HasForms
     public function canMutateSettings(): bool
     {
         return static::getPlugin()->can('mutateSettings');
+    }
+
+    private function auditLog(string $action, ?string $target, mixed $before = null, mixed $after = null): void
+    {
+        try {
+            $logger = app(AuditLogger::class);
+            $logger->log(
+                AuditLogger::currentUserId(),
+                'mutateSettings',
+                $action,
+                $target,
+                $before,
+                $after,
+            );
+        } catch (\Throwable) {
+            // Audit failure must not break the primary operation
+        }
     }
 
     protected function getHeaderActions(): array

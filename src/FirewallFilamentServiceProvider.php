@@ -9,6 +9,7 @@ use Magentron\LaravelFirewallFilament\Adapters\LaravelLogFileAdapter;
 use Magentron\LaravelFirewallFilament\Adapters\LogSourceAdapter;
 use Magentron\LaravelFirewallFilament\Adapters\NullLogSourceAdapter;
 use Magentron\LaravelFirewallFilament\Adapters\RuleStoreAdapter;
+use Magentron\LaravelFirewallFilament\Support\AuditLogger;
 use Magentron\LaravelFirewallFilament\Support\SettingsStore;
 
 class FirewallFilamentServiceProvider extends ServiceProvider
@@ -28,6 +29,8 @@ class FirewallFilamentServiceProvider extends ServiceProvider
 
             return new SettingsStore($settingsFile, $snapshotDir);
         });
+
+        $this->app->singleton(AuditLogger::class);
 
         $this->app->bind(RuleStoreAdapter::class, function () {
             return config('firewall.use_database')
@@ -49,6 +52,7 @@ class FirewallFilamentServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'firewall-filament');
+        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
 
         $this->mergeFirewallSettings();
 
@@ -60,6 +64,10 @@ class FirewallFilamentServiceProvider extends ServiceProvider
             $this->publishes([
                 __DIR__ . '/../resources/views' => resource_path('views/vendor/firewall-filament'),
             ], 'firewall-filament-views');
+
+            $this->publishes([
+                __DIR__ . '/../database/migrations' => database_path('migrations'),
+            ], 'firewall-filament-migrations');
         }
     }
 

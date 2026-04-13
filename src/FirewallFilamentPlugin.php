@@ -9,6 +9,7 @@ use Filament\Panel;
 use Illuminate\Support\Facades\Gate;
 use Magentron\LaravelFirewallFilament\Pages\FirewallSettingsPage;
 use Magentron\LaravelFirewallFilament\Pages\FirewallStatusPage;
+use Magentron\LaravelFirewallFilament\Resources\AuditLogResource;
 use Magentron\LaravelFirewallFilament\Resources\FirewallRuleResource;
 use Magentron\LaravelFirewallFilament\Widgets\RecentLogLinesWidget;
 use Magentron\LaravelFirewallFilament\Widgets\RuleCountsWidget;
@@ -56,6 +57,7 @@ class FirewallFilamentPlugin implements Plugin
     {
         $resources = [
             FirewallRuleResource::class,
+            AuditLogResource::class,
         ];
         $pages = [
             FirewallStatusPage::class,
