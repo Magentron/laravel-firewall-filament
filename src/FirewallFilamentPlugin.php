@@ -7,6 +7,8 @@ use Filament\Contracts\Plugin;
 use Filament\Panel;
 use Magentron\LaravelFirewallFilament\Pages\FirewallStatusPage;
 use Magentron\LaravelFirewallFilament\Resources\FirewallRuleResource;
+use Magentron\LaravelFirewallFilament\Widgets\RecentLogLinesWidget;
+use Magentron\LaravelFirewallFilament\Widgets\RuleCountsWidget;
 
 class FirewallFilamentPlugin implements Plugin
 {
@@ -21,6 +23,10 @@ class FirewallFilamentPlugin implements Plugin
     protected bool $enableLogs = false;
 
     protected bool $enableWidgets = false;
+
+    protected bool $enableRuleCountsWidget = true;
+
+    protected bool $enableRecentLogLinesWidget = true;
 
     protected bool $allowConfigModeMutations = false;
 
@@ -45,7 +51,12 @@ class FirewallFilamentPlugin implements Plugin
         $widgets = [];
 
         if ($this->enableWidgets) {
-            // Widgets will be registered in future stories
+            if ($this->enableRuleCountsWidget) {
+                $widgets[] = RuleCountsWidget::class;
+            }
+            if ($this->enableRecentLogLinesWidget) {
+                $widgets[] = RecentLogLinesWidget::class;
+            }
         }
 
         if ($this->enableSettings) {
@@ -141,6 +152,30 @@ class FirewallFilamentPlugin implements Plugin
     public function hasWidgets(): bool
     {
         return $this->enableWidgets;
+    }
+
+    public function enableRuleCountsWidget(bool $enable = true): static
+    {
+        $this->enableRuleCountsWidget = $enable;
+
+        return $this;
+    }
+
+    public function hasRuleCountsWidget(): bool
+    {
+        return $this->enableRuleCountsWidget;
+    }
+
+    public function enableRecentLogLinesWidget(bool $enable = true): static
+    {
+        $this->enableRecentLogLinesWidget = $enable;
+
+        return $this;
+    }
+
+    public function hasRecentLogLinesWidget(): bool
+    {
+        return $this->enableRecentLogLinesWidget;
     }
 
     public function allowConfigModeMutations(bool $allow = true): static
