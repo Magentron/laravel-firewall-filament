@@ -22,9 +22,15 @@ class FirewallSettingsPage extends Page implements HasForms
 
     protected static ?string $navigationIcon = 'heroicon-o-cog-6-tooth';
 
-    protected static ?string $navigationLabel = 'Firewall Settings';
+    public static function getNavigationLabel(): string
+    {
+        return __('firewall-filament::firewall-filament.settings.navigation_label');
+    }
 
-    protected static ?string $title = 'Firewall Settings';
+    public function getTitle(): string
+    {
+        return __('firewall-filament::firewall-filament.settings.title');
+    }
 
     protected static string $view = 'firewall-filament::pages.firewall-settings';
 
@@ -72,15 +78,15 @@ class FirewallSettingsPage extends Page implements HasForms
     {
         return $form
             ->schema([
-                Section::make('Logging')
-                    ->description('Configure firewall logging behaviour. Only these two settings are editable at runtime.')
+                Section::make(__('firewall-filament::firewall-filament.settings.section.logging'))
+                    ->description(__('firewall-filament::firewall-filament.settings.section.logging_description'))
                     ->schema([
                         Toggle::make('enable_log')
-                            ->label('Enable Firewall Logging')
-                            ->helperText('Toggle firewall request logging on or off.'),
+                            ->label(__('firewall-filament::firewall-filament.settings.field.enable_log'))
+                            ->helperText(__('firewall-filament::firewall-filament.settings.field.enable_log_helper')),
                         TextInput::make('log_stack')
-                            ->label('Log Stack / Channel')
-                            ->helperText('The Laravel log channel to use for firewall entries (e.g. "stack", "single", "daily").')
+                            ->label(__('firewall-filament::firewall-filament.settings.field.log_stack'))
+                            ->helperText(__('firewall-filament::firewall-filament.settings.field.log_stack_helper'))
                             ->nullable(),
                     ]),
             ])
@@ -111,7 +117,7 @@ class FirewallSettingsPage extends Page implements HasForms
         $this->auditLog('settings_change', null, $previous, $settings);
 
         Notification::make()
-            ->title('Settings saved')
+            ->title(__('firewall-filament::firewall-filament.settings.notification.saved'))
             ->success()
             ->send();
     }
@@ -139,13 +145,13 @@ class FirewallSettingsPage extends Page implements HasForms
             $this->auditLog('settings_restore', $snapshotId, $previous, $restored);
 
             Notification::make()
-                ->title('Settings restored')
-                ->body("Restored snapshot from {$snapshotId}.")
+                ->title(__('firewall-filament::firewall-filament.settings.notification.restored'))
+                ->body(__('firewall-filament::firewall-filament.settings.notification.restored_body', ['snapshot' => $snapshotId]))
                 ->success()
                 ->send();
         } catch (\Throwable $e) {
             Notification::make()
-                ->title('Restore failed')
+                ->title(__('firewall-filament::firewall-filament.settings.notification.restore_failed'))
                 ->body($e->getMessage())
                 ->danger()
                 ->send();
@@ -188,7 +194,7 @@ class FirewallSettingsPage extends Page implements HasForms
     {
         return [
             Action::make('save')
-                ->label('Save Settings')
+                ->label(__('firewall-filament::firewall-filament.settings.action.save'))
                 ->action('save')
                 ->icon('heroicon-o-check')
                 ->visible(fn () => $this->canMutateSettings()),

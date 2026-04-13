@@ -11,7 +11,7 @@ class ListAuditLogs extends ListRecords
 
     public function getTitle(): string
     {
-        return 'Audit Trail';
+        return __('firewall-filament::firewall-filament.audit.title');
     }
 
     protected function getHeaderActions(): array

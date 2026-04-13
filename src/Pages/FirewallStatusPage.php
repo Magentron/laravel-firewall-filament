@@ -20,9 +20,15 @@ class FirewallStatusPage extends Page implements HasTable
 
     protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
 
-    protected static ?string $navigationLabel = 'Firewall Status';
+    public static function getNavigationLabel(): string
+    {
+        return __('firewall-filament::firewall-filament.status.navigation_label');
+    }
 
-    protected static ?string $title = 'Firewall Status & Stats';
+    public function getTitle(): string
+    {
+        return __('firewall-filament::firewall-filament.status.title');
+    }
 
     protected static string $view = 'firewall-filament::pages.firewall-status';
 
@@ -121,15 +127,15 @@ class FirewallStatusPage extends Page implements HasTable
             })
             ->columns([
                 TextColumn::make('timestamp')
-                    ->label('Timestamp')
+                    ->label(__('firewall-filament::firewall-filament.status.log.column.timestamp'))
                     ->placeholder('—'),
                 TextColumn::make('entry')
-                    ->label('Log Entry')
+                    ->label(__('firewall-filament::firewall-filament.status.log.column.entry'))
                     ->wrap(),
             ])
             ->recordUrl(null)
             ->paginated(false)
-            ->emptyStateHeading('No log entries')
-            ->emptyStateDescription('No recent firewall log entries found.');
+            ->emptyStateHeading(__('firewall-filament::firewall-filament.status.log.empty_heading'))
+            ->emptyStateDescription(__('firewall-filament::firewall-filament.status.log.empty_description'));
     }
 }

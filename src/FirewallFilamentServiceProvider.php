@@ -52,6 +52,7 @@ class FirewallFilamentServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'firewall-filament');
+        $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'firewall-filament');
         $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
 
         $this->mergeFirewallSettings();
@@ -60,6 +61,10 @@ class FirewallFilamentServiceProvider extends ServiceProvider
             $this->publishes([
                 __DIR__ . '/../config/firewall-filament.php' => config_path('firewall-filament.php'),
             ], 'firewall-filament-config');
+
+            $this->publishes([
+                __DIR__ . '/../resources/lang' => $this->app->langPath('vendor/firewall-filament'),
+            ], 'firewall-filament-translations');
 
             $this->publishes([
                 __DIR__ . '/../resources/views' => resource_path('views/vendor/firewall-filament'),

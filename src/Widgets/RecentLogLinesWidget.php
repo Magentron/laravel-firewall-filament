@@ -16,7 +16,10 @@ class RecentLogLinesWidget extends TableWidget
 
     protected int | string | array $columnSpan = 'full';
 
-    protected static ?string $heading = 'Recent Firewall Log';
+    public function getHeading(): string
+    {
+        return __('firewall-filament::firewall-filament.widget.recent_log.heading');
+    }
 
     public static function canView(): bool
     {
@@ -61,10 +64,10 @@ class RecentLogLinesWidget extends TableWidget
             ->records($entries)
             ->columns([
                 TextColumn::make('timestamp')
-                    ->label('Time')
+                    ->label(__('firewall-filament::firewall-filament.widget.recent_log.column.time'))
                     ->width('180px'),
                 TextColumn::make('entry')
-                    ->label('Log Entry')
+                    ->label(__('firewall-filament::firewall-filament.widget.recent_log.column.entry'))
                     ->wrap(),
             ])
             ->paginated(false);

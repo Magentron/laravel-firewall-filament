@@ -14,11 +14,20 @@ class FirewallRuleResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-shield-check';
 
-    protected static ?string $navigationLabel = 'Firewall Rules';
+    public static function getNavigationLabel(): string
+    {
+        return __('firewall-filament::firewall-filament.rules.navigation_label');
+    }
 
-    protected static ?string $modelLabel = 'Firewall Rule';
+    public static function getModelLabel(): string
+    {
+        return __('firewall-filament::firewall-filament.rules.model_label');
+    }
 
-    protected static ?string $pluralModelLabel = 'Firewall Rules';
+    public static function getPluralModelLabel(): string
+    {
+        return __('firewall-filament::firewall-filament.rules.plural_model_label');
+    }
 
     public static function getModel(): string
     {

@@ -37,7 +37,7 @@ class ManageFirewallRules extends Page implements HasTable
 
     public function getTitle(): string
     {
-        return 'Firewall Rules';
+        return __('firewall-filament::firewall-filament.rules.title');
     }
 
     public function table(Table $table): Table
@@ -86,11 +86,11 @@ class ManageFirewallRules extends Page implements HasTable
             })
             ->columns([
                 TextColumn::make('ip_address')
-                    ->label('IP / CIDR / Range / Pattern')
+                    ->label(__('firewall-filament::firewall-filament.rules.column.ip_address'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('list')
-                    ->label('List')
+                    ->label(__('firewall-filament::firewall-filament.rules.column.list'))
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'whitelist' => 'success',
@@ -98,7 +98,7 @@ class ManageFirewallRules extends Page implements HasTable
                         default => 'gray',
                     }),
                 TextColumn::make('source')
-                    ->label('Source')
+                    ->label(__('firewall-filament::firewall-filament.rules.column.source'))
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'database' => 'info',
@@ -106,23 +106,23 @@ class ManageFirewallRules extends Page implements HasTable
                         default => 'gray',
                     }),
                 TextColumn::make('updated_at')
-                    ->label('Updated')
+                    ->label(__('firewall-filament::firewall-filament.rules.column.updated'))
                     ->placeholder('—'),
             ])
             ->filters([
                 SelectFilter::make('list')
-                    ->label('List')
+                    ->label(__('firewall-filament::firewall-filament.rules.filter.list'))
                     ->options([
-                        'whitelist' => 'Whitelist',
-                        'blacklist' => 'Blacklist',
+                        'whitelist' => __('firewall-filament::firewall-filament.rules.filter.whitelist'),
+                        'blacklist' => __('firewall-filament::firewall-filament.rules.filter.blacklist'),
                     ]),
             ])
             ->actions([
                 TableAction::make('move')
-                    ->label('Move to other list')
+                    ->label(__('firewall-filament::firewall-filament.rules.action.move'))
                     ->icon('heroicon-o-arrow-path')
                     ->requiresConfirmation()
-                    ->modalHeading('Move to other list')
+                    ->modalHeading(__('firewall-filament::firewall-filament.rules.action.move_heading'))
                     ->modalDescription(function (array $record): string {
                         $base = 'This will remove the entry and re-add it to the other list. There is no in-place edit in the upstream package.';
                         $newList = $record['whitelisted'] ? 'blacklist' : 'whitelist';
@@ -145,15 +145,15 @@ class ManageFirewallRules extends Page implements HasTable
                         ]);
 
                         Notification::make()
-                            ->title('Rule moved')
+                            ->title(__('firewall-filament::firewall-filament.rules.notification.moved'))
                             ->body("Moved {$record['ip_address']} to " . ($newWhitelisted ? 'whitelist' : 'blacklist'))
                             ->success()
                             ->send();
                     })
                     ->disabled(!$allowMutations)
-                    ->tooltip(!$allowMutations ? 'Mutations are disabled in config mode. Enable firewall.use_database to persist changes.' : null),
+                    ->tooltip(!$allowMutations ? __('firewall-filament::firewall-filament.rules.config_mode.tooltip') : null),
                 TableAction::make('delete')
-                    ->label('Delete')
+                    ->label(__('firewall-filament::firewall-filament.rules.action.delete'))
                     ->icon('heroicon-o-trash')
                     ->color('danger')
                     ->requiresConfirmation()
@@ -166,17 +166,17 @@ class ManageFirewallRules extends Page implements HasTable
                         ]);
 
                         Notification::make()
-                            ->title('Rule deleted')
+                            ->title(__('firewall-filament::firewall-filament.rules.notification.deleted'))
                             ->body("Removed {$record['ip_address']}")
                             ->success()
                             ->send();
                     })
                     ->disabled(!$allowMutations)
-                    ->tooltip(!$allowMutations ? 'Mutations are disabled in config mode. Enable firewall.use_database to persist changes.' : null),
+                    ->tooltip(!$allowMutations ? __('firewall-filament::firewall-filament.rules.config_mode.tooltip') : null),
             ])
             ->bulkActions([
                 BulkAction::make('delete')
-                    ->label('Delete selected')
+                    ->label(__('firewall-filament::firewall-filament.rules.action.bulk_delete'))
                     ->icon('heroicon-o-trash')
                     ->color('danger')
                     ->requiresConfirmation()
@@ -194,7 +194,7 @@ class ManageFirewallRules extends Page implements HasTable
                         }
 
                         Notification::make()
-                            ->title('Rules deleted')
+                            ->title(__('firewall-filament::firewall-filament.rules.notification.bulk_deleted'))
                             ->body("Removed {$count} rule(s)")
                             ->success()
                             ->send();
@@ -214,13 +214,13 @@ class ManageFirewallRules extends Page implements HasTable
 
         return [
             Action::make('create')
-                ->label('New rule')
+                ->label(__('firewall-filament::firewall-filament.rules.action.new_rule'))
                 ->icon('heroicon-o-plus')
                 ->form([
                     TextInput::make('ip_address')
-                        ->label('IP Address / Pattern')
+                        ->label(__('firewall-filament::firewall-filament.rules.field.ip_address'))
                         ->required()
-                        ->helperText('Accepts: single IP, CIDR (e.g. 10.0.0.0/24), range (e.g. 10.0.0.1-10.0.0.255), country:XX, or host:domain.com. File-path entries are NOT accepted via the UI for security reasons; use the config file instead.')
+                        ->helperText(__('firewall-filament::firewall-filament.rules.field.ip_address_helper'))
                         ->rules([
                             'required',
                             'string',
@@ -228,21 +228,21 @@ class ManageFirewallRules extends Page implements HasTable
                             function () {
                                 return function (string $attribute, $value, $fail) {
                                     if (!FirewallEntryRule::isValid($value)) {
-                                        $fail('The :attribute must be a valid IP address, CIDR notation, IP range, country:XX code, or host:domain pattern.');
+                                        $fail(__('firewall-filament::firewall-filament.rules.field.ip_address_validation'));
                                     }
                                 };
                             },
                         ]),
                     Toggle::make('whitelisted')
-                        ->label('Whitelist')
-                        ->helperText('Enable to add to the whitelist, disable to add to the blacklist.')
+                        ->label(__('firewall-filament::firewall-filament.rules.field.whitelist'))
+                        ->helperText(__('firewall-filament::firewall-filament.rules.field.whitelist_helper'))
                         ->default(true),
                 ])
                 ->action(function (array $data): void {
                     if (!$data['whitelisted'] && $this->wouldLockOut($data['ip_address'])) {
                         Notification::make()
-                            ->title('Lockout prevented')
-                            ->body("Cannot blacklist {$data['ip_address']} — it matches your current session IP.")
+                            ->title(__('firewall-filament::firewall-filament.rules.notification.lockout_prevented'))
+                            ->body(__('firewall-filament::firewall-filament.rules.notification.lockout_body', ['ip' => $data['ip_address']]))
                             ->danger()
                             ->send();
 
@@ -257,21 +257,21 @@ class ManageFirewallRules extends Page implements HasTable
                     ]);
 
                     Notification::make()
-                        ->title('Rule created')
+                        ->title(__('firewall-filament::firewall-filament.rules.notification.created'))
                         ->body("Added {$data['ip_address']} to " . ($data['whitelisted'] ? 'whitelist' : 'blacklist'))
                         ->success()
                         ->send();
                 })
                 ->visible($allowMutations)
-                ->tooltip(fn () => !$allowMutations ? 'Mutations are disabled in config mode. Enable firewall.use_database to persist changes.' : null),
+                ->tooltip(fn () => !$allowMutations ? __('firewall-filament::firewall-filament.rules.config_mode.tooltip') : null),
             Action::make('clearAll')
-                ->label('Clear all rules')
+                ->label(__('firewall-filament::firewall-filament.rules.action.clear_all'))
                 ->icon('heroicon-o-trash')
                 ->color('danger')
                 ->requiresConfirmation()
-                ->modalHeading('Clear all firewall rules')
-                ->modalDescription('This will permanently delete ALL firewall rules (whitelist and blacklist). This action cannot be undone.')
-                ->modalSubmitActionLabel('Yes, clear all rules')
+                ->modalHeading(__('firewall-filament::firewall-filament.rules.action.clear_all_heading'))
+                ->modalDescription(__('firewall-filament::firewall-filament.rules.action.clear_all_description'))
+                ->modalSubmitActionLabel(__('firewall-filament::firewall-filament.rules.action.clear_all_confirm'))
                 ->action(function (): void {
                     $adapter = app(RuleStoreAdapter::class);
                     $allRules = $adapter->all();
@@ -287,7 +287,7 @@ class ManageFirewallRules extends Page implements HasTable
                     $this->auditLog('clear', null, $before);
 
                     Notification::make()
-                        ->title('All rules cleared')
+                        ->title(__('firewall-filament::firewall-filament.rules.notification.cleared'))
                         ->body('Removed ' . count($before) . ' rule(s)')
                         ->success()
                         ->send();

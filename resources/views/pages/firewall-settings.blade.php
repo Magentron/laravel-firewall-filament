@@ -4,19 +4,18 @@
 
         <div class="mt-4">
             <x-filament::button type="submit" icon="heroicon-o-check">
-                Save Settings
+                {{ __('firewall-filament::firewall-filament.settings.action.save') }}
             </x-filament::button>
         </div>
     </form>
 
     <x-filament::section>
-        <x-slot name="heading">Settings File</x-slot>
+        <x-slot name="heading">{{ __('firewall-filament::firewall-filament.settings.section.file') }}</x-slot>
         <p class="text-sm text-gray-500 dark:text-gray-400">
-            Settings are persisted to: <code class="rounded bg-gray-100 px-1 py-0.5 dark:bg-gray-800">{{ $this->getSettingsFilePath() }}</code>
+            {{ __('firewall-filament::firewall-filament.settings.file.path') }} <code class="rounded bg-gray-100 px-1 py-0.5 dark:bg-gray-800">{{ $this->getSettingsFilePath() }}</code>
         </p>
         <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
-            This file is the single source of truth for <code>firewall.enable_log</code> and <code>firewall.log_stack</code>.
-            Values are merged over the published config at boot time.
+            {!! __('firewall-filament::firewall-filament.settings.file.description') !!}
         </p>
     </x-filament::section>
 
@@ -25,11 +24,11 @@
     @endphp
 
     <x-filament::section>
-        <x-slot name="heading">Rollback History</x-slot>
-        <x-slot name="description">Previous settings snapshots. Restore any snapshot to revert settings.</x-slot>
+        <x-slot name="heading">{{ __('firewall-filament::firewall-filament.settings.section.rollback') }}</x-slot>
+        <x-slot name="description">{{ __('firewall-filament::firewall-filament.settings.section.rollback_description') }}</x-slot>
 
         @if (count($snapshots) === 0)
-            <p class="text-sm text-gray-500 dark:text-gray-400">No snapshots available yet. Snapshots are created automatically each time you save.</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('firewall-filament::firewall-filament.settings.snapshot.empty') }}</p>
         @else
             <div class="divide-y divide-gray-200 dark:divide-gray-700">
                 @foreach ($snapshots as $snapshot)
@@ -54,9 +53,9 @@
                             color="warning"
                             icon="heroicon-o-arrow-uturn-left"
                             wire:click="restoreSnapshot('{{ $snapshot['id'] }}')"
-                            wire:confirm="Are you sure you want to restore settings from {{ $snapshot['date'] }}?"
+                            wire:confirm="{{ __('firewall-filament::firewall-filament.settings.snapshot.confirm', ['date' => $snapshot['date']]) }}"
                         >
-                            Restore
+                            {{ __('firewall-filament::firewall-filament.settings.snapshot.restore') }}
                         </x-filament::button>
                     </div>
                 @endforeach

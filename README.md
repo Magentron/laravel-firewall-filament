@@ -50,6 +50,50 @@ FirewallFilamentPlugin::make()
 
 By default, all admin surfaces **deny access** unless you configure `authorizeUsing()`. This is a secure default — you must explicitly grant access.
 
+## Publishing
+
+The package provides several publishable assets. Use `vendor:publish` with the appropriate tag:
+
+### Config
+
+Publish the configuration file to `config/firewall-filament.php`:
+
+```bash
+php artisan vendor:publish --tag=firewall-filament-config
+```
+
+This allows you to customize the log file path, settings file location, and snapshot directory.
+
+### Translations
+
+Publish translation files to `lang/vendor/firewall-filament/`:
+
+```bash
+php artisan vendor:publish --tag=firewall-filament-translations
+```
+
+English translations are shipped by default. After publishing, you can customize all labels, navigation titles, notifications, form fields, and other UI strings. To add a new language, create a subdirectory (e.g. `lang/vendor/firewall-filament/nl/`) with a `firewall-filament.php` translation file.
+
+### Views
+
+Publish Blade views to `resources/views/vendor/firewall-filament/`:
+
+```bash
+php artisan vendor:publish --tag=firewall-filament-views
+```
+
+This allows you to customize the layout and markup of the firewall management pages (rules, status, and settings).
+
+### Migrations
+
+Publish database migrations to `database/migrations/`:
+
+```bash
+php artisan vendor:publish --tag=firewall-filament-migrations
+```
+
+This is useful if you need to customize the audit log table schema. Migrations are auto-loaded by the package, so publishing is optional.
+
 ## License
 
 MIT. See [LICENSE](LICENSE) for details.

@@ -39,20 +39,21 @@ class RuleCountsWidget extends StatsOverviewWidget
         $whitelistCount = $rules->filter(fn ($r) => $r->whitelisted)->count();
         $blacklistCount = $rules->filter(fn ($r) => ! $r->whitelisted)->count();
         $total = $rules->count();
-        $storageMode = config('firewall.use_database') ? 'Database' : 'Config';
+        $useDatabase = (bool) config('firewall.use_database');
+        $storageMode = $useDatabase ? __('firewall-filament::firewall-filament.status.config.database') : __('firewall-filament::firewall-filament.status.config.config');
 
         return [
-            Stat::make('Whitelisted IPs', $whitelistCount)
+            Stat::make(__('firewall-filament::firewall-filament.widget.rule_counts.whitelist'), $whitelistCount)
                 ->icon('heroicon-o-check-circle')
                 ->color('success'),
-            Stat::make('Blacklisted IPs', $blacklistCount)
+            Stat::make(__('firewall-filament::firewall-filament.widget.rule_counts.blacklist'), $blacklistCount)
                 ->icon('heroicon-o-x-circle')
                 ->color('danger'),
-            Stat::make('Total Rules', $total)
+            Stat::make(__('firewall-filament::firewall-filament.widget.rule_counts.total'), $total)
                 ->icon('heroicon-o-shield-check'),
-            Stat::make('Storage Mode', $storageMode)
+            Stat::make(__('firewall-filament::firewall-filament.widget.rule_counts.storage'), $storageMode)
                 ->icon('heroicon-o-circle-stack')
-                ->color($storageMode === 'Database' ? 'info' : 'warning'),
+                ->color($useDatabase ? 'info' : 'warning'),
         ];
     }
 

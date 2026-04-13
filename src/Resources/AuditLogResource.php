@@ -16,11 +16,20 @@ class AuditLogResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
 
-    protected static ?string $navigationLabel = 'Audit Trail';
+    public static function getNavigationLabel(): string
+    {
+        return __('firewall-filament::firewall-filament.audit.navigation_label');
+    }
 
-    protected static ?string $modelLabel = 'Audit Entry';
+    public static function getModelLabel(): string
+    {
+        return __('firewall-filament::firewall-filament.audit.model_label');
+    }
 
-    protected static ?string $pluralModelLabel = 'Audit Trail';
+    public static function getPluralModelLabel(): string
+    {
+        return __('firewall-filament::firewall-filament.audit.plural_model_label');
+    }
 
     public static function getSlug(): string
     {
@@ -64,18 +73,18 @@ class AuditLogResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('created_at')
-                    ->label('Date')
+                    ->label(__('firewall-filament::firewall-filament.audit.column.date'))
                     ->dateTime()
                     ->sortable(),
                 TextColumn::make('user_id')
-                    ->label('User ID')
+                    ->label(__('firewall-filament::firewall-filament.audit.column.user_id'))
                     ->sortable(),
                 TextColumn::make('ability')
-                    ->label('Ability')
+                    ->label(__('firewall-filament::firewall-filament.audit.column.ability'))
                     ->badge()
                     ->sortable(),
                 TextColumn::make('action')
-                    ->label('Action')
+                    ->label(__('firewall-filament::firewall-filament.audit.column.action'))
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'add' => 'success',
@@ -86,15 +95,15 @@ class AuditLogResource extends Resource
                     })
                     ->sortable(),
                 TextColumn::make('target')
-                    ->label('Target')
+                    ->label(__('firewall-filament::firewall-filament.audit.column.target'))
                     ->limit(50),
                 TextColumn::make('before')
-                    ->label('Before')
+                    ->label(__('firewall-filament::firewall-filament.audit.column.before'))
                     ->formatStateUsing(fn ($state) => $state !== null ? json_encode($state, JSON_UNESCAPED_SLASHES) : '—')
                     ->limit(60)
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('after')
-                    ->label('After')
+                    ->label(__('firewall-filament::firewall-filament.audit.column.after'))
                     ->formatStateUsing(fn ($state) => $state !== null ? json_encode($state, JSON_UNESCAPED_SLASHES) : '—')
                     ->limit(60)
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -102,17 +111,17 @@ class AuditLogResource extends Resource
             ->filters([
                 SelectFilter::make('action')
                     ->options([
-                        'add' => 'Add',
-                        'remove' => 'Remove',
-                        'move' => 'Move',
-                        'clear' => 'Clear',
-                        'settings_change' => 'Settings Change',
-                        'settings_restore' => 'Settings Restore',
+                        'add' => __('firewall-filament::firewall-filament.audit.filter.action.add'),
+                        'remove' => __('firewall-filament::firewall-filament.audit.filter.action.remove'),
+                        'move' => __('firewall-filament::firewall-filament.audit.filter.action.move'),
+                        'clear' => __('firewall-filament::firewall-filament.audit.filter.action.clear'),
+                        'settings_change' => __('firewall-filament::firewall-filament.audit.filter.action.settings_change'),
+                        'settings_restore' => __('firewall-filament::firewall-filament.audit.filter.action.settings_restore'),
                     ]),
                 SelectFilter::make('ability')
                     ->options([
-                        'mutateRules' => 'Mutate Rules',
-                        'mutateSettings' => 'Mutate Settings',
+                        'mutateRules' => __('firewall-filament::firewall-filament.audit.filter.ability.mutate_rules'),
+                        'mutateSettings' => __('firewall-filament::firewall-filament.audit.filter.ability.mutate_settings'),
                     ]),
             ])
             ->defaultSort('created_at', 'desc')
