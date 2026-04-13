@@ -6,7 +6,7 @@ A [Filament](https://filamentphp.com/) admin panel integration for [magentron/la
 
 - PHP 8.2+
 - Laravel 11.28+, 12, or 13 (Laravel 10 is **not** supported — Filament 4 requires `illuminate/contracts: ^11.28|^12.0|^13.0`)
-- Filament 4 (Filament 3 is **not** supported on the `main` / `2.x` branch — see [Filament version support](#filament-version-support) below)
+- Filament 4 (Filament 3 is **not** supported from v0.2.0 onwards — see [Filament version support](#filament-version-support) below)
 - [magentron/laravel-firewall](https://github.com/magentron/laravel-firewall) 3.x
 
 ### Tested combinations
@@ -22,10 +22,10 @@ Combinations outside this matrix are **best effort** — they may work but are n
 
 ### Filament version support
 
-This package targets **Filament 4 only** on the `main` / `2.x` branch. Filament 3 is not supported. The original PRD left the v3/v4 strategy open (single-codebase shim vs. parallel major branches) and the project has now committed to the parallel-branch path:
+From **v0.2.0 onwards**, this package targets **Filament 4 only**. Filament 3 is not supported. The original PRD left the v3/v4 strategy open (single-codebase shim vs. parallel major branches) and the project has now committed to the clean-break path:
 
-- **`2.x` / `main`** — Filament 4 (current).
-- **`1.x`** — Filament 3. **Not yet published.** Would only be cut if there is concrete user demand; open an issue if you need it.
+- **v0.2.0+ (current `main`)** — Filament 4.
+- **v0.1.0** — the only release with Filament 3 support. No maintained `1.x` branch exists; a backport branch would only be cut if there is concrete user demand. Open an issue if you need it.
 
 Reason for the split: the v3→v4 divergences in the core classes this package extends cannot be bridged in a single source tree. Specifically:
 

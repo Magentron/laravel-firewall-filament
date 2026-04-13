@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.2.0] - 2026-04-13
 
 ### Changed
-- **BREAKING**: Dropped Filament 3 support. The `main` / `2.x` branch now targets Filament 4 only. Rationale and full divergence list in README "Filament version support" section and PRD §7.3. A `1.x` branch for Filament 3 is not cut; open an issue if you need it.
+- **BREAKING**: Dropped Filament 3 support. From v0.2.0 onwards this package targets Filament 4 only. Rationale and full divergence list in README "Filament version support" section and PRD §7.3. Filament 3 users should pin to `v0.1.0`; open an issue if you need a maintained backport branch.
 - **BREAKING**: Dropped Laravel 10 support as a consequence of the Filament 4 requirement. Filament 4's `filament/support` requires `illuminate/contracts: ^11.28|^12.0|^13.0`, which excludes Laravel 10 at composer resolution time. Supported Laravel versions are now **11.28+, 12, and 13**.
 - **BREAKING**: Dropped PHP 8.1 support. Filament 4 requires PHP ^8.2. Minimum PHP is now **8.2**.
 - `composer.json` `filament/filament` constraint tightened from `^3.0|^4.0` to `^4.0`.
@@ -63,7 +63,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 166 automated tests (121 unit + 45 feature)
 - CI matrix: PHP 8.2–8.3, Laravel 10–13, Filament 3–4
 
-> **Note (historical):** The Filament 3 / Laravel 10 / PHP 8.1 support claimed in this 0.1.0 entry has been **superseded** by the breaking changes in the `[Unreleased]` section above. On the `main` / `2.x` branch the supported matrix is now PHP 8.2+, Laravel 11.28+/12/13, Filament 4 only. This 0.1.0 entry is retained as-is for historical accuracy; do not rely on it as the current support contract.
+> **Note (historical):** The Filament 3 / Laravel 10 / PHP 8.1 support claimed in this 0.1.0 entry has been **superseded** by the breaking changes in 0.2.0 above. From v0.2.0 onwards the supported matrix is PHP 8.2+, Laravel 11.28+/12/13, Filament 4 only. This 0.1.0 entry is retained as-is for historical accuracy; do not rely on it as the current support contract.
 
 [0.2.0]: https://github.com/magentron/laravel-firewall-filament/releases/tag/v0.2.0
 [0.1.0]: https://github.com/magentron/laravel-firewall-filament/releases/tag/v0.1.0
