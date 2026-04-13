@@ -9,6 +9,19 @@ A [Filament](https://filamentphp.com/) admin panel integration for [magentron/la
 - Filament 3 or 4
 - [magentron/laravel-firewall](https://github.com/magentron/laravel-firewall) 3.x
 
+### Tested combinations
+
+| PHP | Laravel | Filament |
+|-----|---------|----------|
+| 8.2 | 10      | 3        |
+| 8.2 | 11      | 3        |
+| 8.3 | 11      | 3        |
+| 8.3 | 12      | 3        |
+| 8.3 | 12      | 4        |
+| 8.3 | 13      | 4        |
+
+Combinations outside this matrix (e.g. PHP 8.1 + Laravel 11, Laravel 10 + Filament 4) are **best effort** — they may work but are not tested in CI and not claimed as supported.
+
 ## Installation
 
 Install the package via Composer:

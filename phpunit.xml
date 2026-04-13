@@ -6,6 +6,10 @@
     <testsuites>
         <testsuite name="Unit">
             <directory>tests</directory>
+            <exclude>tests/Feature</exclude>
+        </testsuite>
+        <testsuite name="Feature">
+            <directory>tests/Feature</directory>
         </testsuite>
     </testsuites>
 </phpunit>

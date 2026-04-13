@@ -1,0 +1,60 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - php: '8.2'
+            laravel: '10.*'
+            filament: '3.*'
+            testbench: '8.*'
+          - php: '8.2'
+            laravel: '11.*'
+            filament: '3.*'
+            testbench: '9.*'
+          - php: '8.3'
+            laravel: '11.*'
+            filament: '3.*'
+            testbench: '9.*'
+          - php: '8.3'
+            laravel: '12.*'
+            filament: '3.*'
+            testbench: '10.*'
+          - php: '8.3'
+            laravel: '12.*'
+            filament: '4.*'
+            testbench: '10.*'
+          - php: '8.3'
+            laravel: '13.*'
+            filament: '4.*'
+            testbench: '10.*'
+
+    name: PHP ${{ matrix.php }} / Laravel ${{ matrix.laravel }} / Filament ${{ matrix.filament }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, sqlite3
+          coverage: none
+
+      - name: Install dependencies
+        run: |
+          composer require "illuminate/support:${{ matrix.laravel }}" "filament/filament:${{ matrix.filament }}" "orchestra/testbench:${{ matrix.testbench }}" --no-update
+          composer update --prefer-dist --no-interaction --no-progress
+
+      - name: Run tests
+        run: vendor/bin/phpunit
