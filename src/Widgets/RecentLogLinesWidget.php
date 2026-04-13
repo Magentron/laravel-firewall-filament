@@ -26,7 +26,7 @@ class RecentLogLinesWidget extends TableWidget
             return false;
         }
 
-        if (! $plugin->isAuthorized()) {
+        if (! $plugin->can('viewLogs')) {
             return false;
         }
 

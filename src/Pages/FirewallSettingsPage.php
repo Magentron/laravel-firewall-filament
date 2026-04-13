@@ -50,7 +50,7 @@ class FirewallSettingsPage extends Page implements HasForms
 
     public static function canAccess(): bool
     {
-        return static::getPlugin()->isAuthorized() && static::getPlugin()->hasSettings();
+        return static::getPlugin()->can('viewSettings') && static::getPlugin()->hasSettings();
     }
 
     public function mount(): void
@@ -157,13 +157,19 @@ class FirewallSettingsPage extends Page implements HasForms
         return app(SettingsStore::class)->getSettingsFilePath();
     }
 
+    public function canMutateSettings(): bool
+    {
+        return static::getPlugin()->can('mutateSettings');
+    }
+
     protected function getHeaderActions(): array
     {
         return [
             Action::make('save')
                 ->label('Save Settings')
                 ->action('save')
-                ->icon('heroicon-o-check'),
+                ->icon('heroicon-o-check')
+                ->visible(fn () => $this->canMutateSettings()),
         ];
     }
 }

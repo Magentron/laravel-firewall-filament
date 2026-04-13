@@ -4,7 +4,9 @@ namespace Magentron\LaravelFirewallFilament;
 
 use Closure;
 use Filament\Contracts\Plugin;
+use Filament\Facades\Filament;
 use Filament\Panel;
+use Illuminate\Support\Facades\Gate;
 use Magentron\LaravelFirewallFilament\Pages\FirewallSettingsPage;
 use Magentron\LaravelFirewallFilament\Pages\FirewallStatusPage;
 use Magentron\LaravelFirewallFilament\Resources\FirewallRuleResource;
@@ -13,11 +15,20 @@ use Magentron\LaravelFirewallFilament\Widgets\RuleCountsWidget;
 
 class FirewallFilamentPlugin implements Plugin
 {
+    public const ABILITIES = [
+        'viewRules',
+        'mutateRules',
+        'viewLogs',
+        'viewSettings',
+        'mutateSettings',
+    ];
+
     protected ?string $navigationGroup = null;
 
     protected string $slug = 'firewall';
 
-    protected ?Closure $authorizeUsing = null;
+    /** @var (callable(object, string): bool)|null */
+    protected $authorizeUsing = null;
 
     protected bool $enableSettings = false;
 
@@ -103,20 +114,51 @@ class FirewallFilamentPlugin implements Plugin
         return $this->slug;
     }
 
-    public function authorizeUsing(?Closure $callback): static
+    public function authorizeUsing(callable $callback): static
     {
         $this->authorizeUsing = $callback;
 
         return $this;
     }
 
-    public function isAuthorized(): bool
+    public function authorizeWithGate(string $gate): static
+    {
+        $this->authorizeUsing = function (object $user, string $ability) use ($gate): bool {
+            return Gate::forUser($user)->allows($gate);
+        };
+
+        return $this;
+    }
+
+    public function canForUser(object $user, string $ability): bool
     {
         if ($this->authorizeUsing === null) {
             return false;
         }
 
-        return (bool) ($this->authorizeUsing)();
+        return (bool) ($this->authorizeUsing)($user, $ability);
+    }
+
+    public function can(string $ability): bool
+    {
+        try {
+            $user = Filament::auth()->user();
+        } catch (\Throwable) {
+            $user = null;
+        }
+
+        if ($user === null) {
+            return false;
+        }
+
+        return $this->canForUser($user, $ability);
+    }
+
+    public function isAuthorized(): bool
+    {
+        return $this->can('viewRules')
+            || $this->can('viewLogs')
+            || $this->can('viewSettings');
     }
 
     public function enableSettings(bool $enable = true): static

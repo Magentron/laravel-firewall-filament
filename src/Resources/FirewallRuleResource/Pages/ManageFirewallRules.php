@@ -41,7 +41,9 @@ class ManageFirewallRules extends Page implements HasTable
     public function table(Table $table): Table
     {
         $isConfigMode = !config('firewall.use_database');
-        $allowMutations = !$isConfigMode || FirewallRuleResource::getPlugin()->allowsConfigModeMutations();
+        $plugin = FirewallRuleResource::getPlugin();
+        $allowMutations = $plugin->can('mutateRules')
+            && (!$isConfigMode || $plugin->allowsConfigModeMutations());
 
         return $table
             ->records(function (
@@ -182,7 +184,9 @@ class ManageFirewallRules extends Page implements HasTable
     protected function getHeaderActions(): array
     {
         $isConfigMode = !config('firewall.use_database');
-        $allowMutations = !$isConfigMode || FirewallRuleResource::getPlugin()->allowsConfigModeMutations();
+        $plugin = FirewallRuleResource::getPlugin();
+        $allowMutations = $plugin->can('mutateRules')
+            && (!$isConfigMode || $plugin->allowsConfigModeMutations());
 
         return [
             Action::make('create')

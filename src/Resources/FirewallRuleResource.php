@@ -51,6 +51,6 @@ class FirewallRuleResource extends Resource
 
     public static function canAccess(): bool
     {
-        return static::getPlugin()->isAuthorized();
+        return static::getPlugin()->can('viewRules');
     }
 }

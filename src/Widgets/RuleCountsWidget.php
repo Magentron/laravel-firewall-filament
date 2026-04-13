@@ -20,7 +20,7 @@ class RuleCountsWidget extends StatsOverviewWidget
             return false;
         }
 
-        if (! $plugin->isAuthorized()) {
+        if (! $plugin->can('viewRules')) {
             return false;
         }
 

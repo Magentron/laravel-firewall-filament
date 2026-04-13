@@ -45,7 +45,7 @@ class FirewallStatusPage extends Page implements HasTable
 
     public static function canAccess(): bool
     {
-        return static::getPlugin()->isAuthorized();
+        return static::getPlugin()->can('viewLogs');
     }
 
     public function getWhitelistCount(): int
