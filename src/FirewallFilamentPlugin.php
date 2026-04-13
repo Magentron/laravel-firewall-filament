@@ -5,6 +5,7 @@ namespace Magentron\LaravelFirewallFilament;
 use Closure;
 use Filament\Contracts\Plugin;
 use Filament\Panel;
+use Magentron\LaravelFirewallFilament\Pages\FirewallStatusPage;
 use Magentron\LaravelFirewallFilament\Resources\FirewallRuleResource;
 
 class FirewallFilamentPlugin implements Plugin
@@ -38,7 +39,9 @@ class FirewallFilamentPlugin implements Plugin
         $resources = [
             FirewallRuleResource::class,
         ];
-        $pages = [];
+        $pages = [
+            FirewallStatusPage::class,
+        ];
         $widgets = [];
 
         if ($this->enableWidgets) {
