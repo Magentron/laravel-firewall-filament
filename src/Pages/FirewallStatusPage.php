@@ -4,6 +4,7 @@ namespace Magentron\LaravelFirewallFilament\Pages;
 
 use BackedEnum;
 use Filament\Pages\Page;
+use Filament\Panel;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
@@ -14,6 +15,7 @@ use Magentron\LaravelFirewallFilament\Adapters\RuleStoreAdapter;
 use Magentron\LaravelFirewallFilament\FirewallFilamentPlugin;
 use Magentron\LaravelFirewallFilament\Support\LogEntryParser;
 use PragmaRX\Firewall\Vendor\Laravel\Facade as Firewall;
+use Throwable;
 
 class FirewallStatusPage extends Page implements HasTable
 {
@@ -33,7 +35,7 @@ class FirewallStatusPage extends Page implements HasTable
 
     protected string $view = 'firewall-filament::pages.firewall-status';
 
-    public static function getSlug(?\Filament\Panel $panel = null): string
+    public static function getSlug(?Panel $panel = null): string
     {
         return static::getPlugin()->getSlug() . '/status';
     }
@@ -50,6 +52,10 @@ class FirewallStatusPage extends Page implements HasTable
             ?? FirewallFilamentPlugin::make();
     }
 
+    // Defence in depth: registration in the plugin already gates the page
+    // on hasLogs(), but we re-check both hasLogs() and the viewLogs ability
+    // here so a future panel-level refactor that registers the page
+    // unconditionally still cannot serve it to users who should not see it.
     public static function canAccess(): bool
     {
         $plugin = static::getPlugin();
@@ -99,7 +105,7 @@ class FirewallStatusPage extends Page implements HasTable
             }
 
             return null;
-        } catch (\Throwable) {
+        } catch (Throwable) {
             return null;
         }
     }

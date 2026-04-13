@@ -12,10 +12,12 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Filament\Panel;
 use Magentron\LaravelFirewallFilament\Events\FirewallSettingsChanged;
 use Magentron\LaravelFirewallFilament\FirewallFilamentPlugin;
 use Magentron\LaravelFirewallFilament\Support\AuditLogger;
 use Magentron\LaravelFirewallFilament\Support\SettingsStore;
+use Throwable;
 
 class FirewallSettingsPage extends Page implements HasForms
 {
@@ -39,7 +41,7 @@ class FirewallSettingsPage extends Page implements HasForms
 
     public ?string $log_stack = null;
 
-    public static function getSlug(?\Filament\Panel $panel = null): string
+    public static function getSlug(?Panel $panel = null): string
     {
         return static::getPlugin()->getSlug() . '/settings';
     }
@@ -168,7 +170,7 @@ class FirewallSettingsPage extends Page implements HasForms
                 ->body(__('firewall-filament::firewall-filament.settings.notification.restored_body', ['snapshot' => $snapshotId]))
                 ->success()
                 ->send();
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             Notification::make()
                 ->title(__('firewall-filament::firewall-filament.settings.notification.restore_failed'))
                 ->body($e->getMessage())
@@ -192,7 +194,12 @@ class FirewallSettingsPage extends Page implements HasForms
         return static::getPlugin()->can('mutateSettings');
     }
 
-    private function auditLog(string $action, ?string $target, mixed $before = null, mixed $after = null): void
+    /**
+     * Write an audit-log entry for a settings mutation. Failures in the
+     * audit sink are swallowed so they cannot block the primary save /
+     * restore operation.
+     */
+    protected function auditLog(string $action, ?string $target, mixed $before = null, mixed $after = null): void
     {
         try {
             $logger = app(AuditLogger::class);
@@ -204,8 +211,8 @@ class FirewallSettingsPage extends Page implements HasForms
                 $before,
                 $after,
             );
-        } catch (\Throwable) {
-            // Audit failure must not break the primary operation
+        } catch (Throwable) {
+            // Audit failure must not break the primary operation.
         }
     }
 

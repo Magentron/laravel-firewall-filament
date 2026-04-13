@@ -10,6 +10,13 @@ return [
     // may open. Paths are canonicalized via realpath() before comparison, so
     // symlinks resolving outside this list are rejected. An empty list disables
     // log file reading entirely, regardless of `log_file`.
+    //
+    // Note on log rotation: paths are matched by strict realpath() equality.
+    // An entry like `/var/log/laravel.log` will NOT match rotated variants
+    // such as `/var/log/laravel.log.1` or `/var/log/laravel.log-2026-04-13`.
+    // If you rotate logs, either point `log_file` at a symlink that always
+    // resolves to the current active log and add the symlink target to the
+    // allowlist, or list every rotated name you want to permit.
     'log_file_allowlist' => [],
 
     // Path to the JSON file used to persist runtime-writable settings

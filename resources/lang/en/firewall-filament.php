@@ -56,7 +56,7 @@ return [
     'rules.notification.lockout_prevented' => 'Lockout prevented',
     'rules.notification.lockout_body' => 'Cannot blacklist :ip — it matches your current session IP.',
     'rules.notification.move_failed' => 'Move failed',
-    'rules.notification.move_failed_body' => 'Could not move :ip. It may be a config-sourced entry (read-only) or the upstream store rejected the change.',
+    'rules.notification.move_failed_body' => 'Could not move :ip. Possible causes: (a) the entry is config-sourced and read-only; (b) the upstream store rejected the change; (c) the remove step succeeded but the subsequent re-add failed — in that case the entry may have been deleted from the original list and NOT re-added. Verify the rules list and re-create the entry if necessary.',
     'rules.notification.delete_failed' => 'Delete failed',
     'rules.notification.delete_failed_body' => 'Could not remove :ip. It may be a config-sourced entry (read-only) or the upstream store rejected the change.',
     'rules.notification.create_failed' => 'Create failed',

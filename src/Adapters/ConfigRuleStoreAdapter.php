@@ -42,12 +42,12 @@ class ConfigRuleStoreAdapter implements RuleStoreAdapter
             : Firewall::blacklist($ip, $force);
     }
 
-    public function remove(string $ip): bool
+    public function remove(string $ip, ?RuleEntry $knownEntry = null): bool
     {
         return Firewall::remove($ip);
     }
 
-    public function move(string $ip, bool $whitelisted): bool
+    public function move(string $ip, bool $whitelisted, ?RuleEntry $knownEntry = null): bool
     {
         $this->remove($ip);
 

@@ -39,10 +39,22 @@ class FirewallFilamentServiceProvider extends ServiceProvider
         });
 
         $this->app->bind(LogSourceAdapter::class, function () {
-            $logPath = config('firewall-filament.log_file');
+            $logPath   = config('firewall-filament.log_file');
             $allowlist = (array) config('firewall-filament.log_file_allowlist', []);
 
-            if ($logPath !== null && $logPath !== '' && $allowlist !== []) {
+            // Surface a misconfiguration warning: `log_file` is set but the
+            // allowlist is empty, so the adapter will silently downgrade to
+            // NullLogSourceAdapter and the operator will see "no logs" with
+            // no obvious reason why. One log line per resolution is enough
+            // to leave a breadcrumb without spamming the channel.
+            if (null !== $logPath && '' !== $logPath && [] === $allowlist) {
+                logger()->warning(
+                    'firewall-filament: `log_file` is configured (' . $logPath . ') but `log_file_allowlist` is empty. '
+                    . 'Log file reading is disabled. Add the absolute path to `log_file_allowlist` in config/firewall-filament.php to enable it.'
+                );
+            }
+
+            if (null !== $logPath && '' !== $logPath && [] !== $allowlist) {
                 return new LaravelLogFileAdapter($logPath, $allowlist);
             }
 
