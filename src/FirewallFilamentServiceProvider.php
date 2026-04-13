@@ -38,10 +38,16 @@ class FirewallFilamentServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'firewall-filament');
+
         if ($this->app->runningInConsole()) {
             $this->publishes([
                 __DIR__ . '/../config/firewall-filament.php' => config_path('firewall-filament.php'),
             ], 'firewall-filament-config');
+
+            $this->publishes([
+                __DIR__ . '/../resources/views' => resource_path('views/vendor/firewall-filament'),
+            ], 'firewall-filament-views');
         }
     }
 }

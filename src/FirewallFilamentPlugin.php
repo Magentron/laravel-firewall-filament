@@ -5,6 +5,7 @@ namespace Magentron\LaravelFirewallFilament;
 use Closure;
 use Filament\Contracts\Plugin;
 use Filament\Panel;
+use Magentron\LaravelFirewallFilament\Resources\FirewallRuleResource;
 
 class FirewallFilamentPlugin implements Plugin
 {
@@ -20,6 +21,8 @@ class FirewallFilamentPlugin implements Plugin
 
     protected bool $enableWidgets = false;
 
+    protected bool $allowConfigModeMutations = false;
+
     public static function make(): static
     {
         return new static();
@@ -32,7 +35,9 @@ class FirewallFilamentPlugin implements Plugin
 
     public function register(Panel $panel): void
     {
-        $resources = [];
+        $resources = [
+            FirewallRuleResource::class,
+        ];
         $pages = [];
         $widgets = [];
 
@@ -133,5 +138,17 @@ class FirewallFilamentPlugin implements Plugin
     public function hasWidgets(): bool
     {
         return $this->enableWidgets;
+    }
+
+    public function allowConfigModeMutations(bool $allow = true): static
+    {
+        $this->allowConfigModeMutations = $allow;
+
+        return $this;
+    }
+
+    public function allowsConfigModeMutations(): bool
+    {
+        return $this->allowConfigModeMutations;
     }
 }
