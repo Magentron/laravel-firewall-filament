@@ -2,6 +2,7 @@
 
 namespace Magentron\LaravelFirewallFilament\Pages;
 
+use BackedEnum;
 use Filament\Pages\Page;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
@@ -18,7 +19,7 @@ class FirewallStatusPage extends Page implements HasTable
 {
     use InteractsWithTable;
 
-    protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-chart-bar';
 
     public static function getNavigationLabel(): string
     {
@@ -30,9 +31,9 @@ class FirewallStatusPage extends Page implements HasTable
         return __('firewall-filament::firewall-filament.status.title');
     }
 
-    protected static string $view = 'firewall-filament::pages.firewall-status';
+    protected string $view = 'firewall-filament::pages.firewall-status';
 
-    public static function getSlug(): string
+    public static function getSlug(?\Filament\Panel $panel = null): string
     {
         return static::getPlugin()->getSlug() . '/status';
     }
@@ -51,7 +52,9 @@ class FirewallStatusPage extends Page implements HasTable
 
     public static function canAccess(): bool
     {
-        return static::getPlugin()->can('viewLogs');
+        $plugin = static::getPlugin();
+
+        return $plugin->hasLogs() && $plugin->can('viewLogs');
     }
 
     public function getWhitelistCount(): int

@@ -3,12 +3,12 @@
 namespace Magentron\LaravelFirewallFilament\Resources\FirewallRuleResource\Pages;
 
 use Filament\Actions\Action;
+use Filament\Actions\BulkAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
-use Filament\Tables\Actions\Action as TableAction;
-use Filament\Tables\Actions\BulkAction;
+use Filament\Actions\Action as TableAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
@@ -28,7 +28,7 @@ class ManageFirewallRules extends Page implements HasTable
 
     protected static string $resource = FirewallRuleResource::class;
 
-    protected static string $view = 'firewall-filament::pages.manage-firewall-rules';
+    protected string $view = 'firewall-filament::pages.manage-firewall-rules';
 
     public static function getResource(): string
     {
@@ -57,7 +57,7 @@ class ManageFirewallRules extends Page implements HasTable
                 $adapter = app(RuleStoreAdapter::class);
                 $records = $adapter->all()->map(function (RuleEntry $entry) {
                     return [
-                        'key' => $entry->ip_address,
+                        'key' => $entry->source . ':' . $entry->ip_address,
                         'ip_address' => $entry->ip_address,
                         'whitelisted' => $entry->whitelisted,
                         'list' => $entry->whitelisted ? 'whitelist' : 'blacklist',
@@ -133,10 +133,24 @@ class ManageFirewallRules extends Page implements HasTable
 
                         return $base;
                     })
-                    ->action(function (array $record): void {
+                    ->action(function (array $record) use ($allowMutations): void {
+                        if (! $allowMutations || ($record['source'] ?? null) === 'config') {
+                            abort(403);
+                        }
+
                         $adapter = app(RuleStoreAdapter::class);
                         $newWhitelisted = !$record['whitelisted'];
-                        $adapter->move($record['ip_address'], $newWhitelisted);
+                        $success = $adapter->move($record['ip_address'], $newWhitelisted);
+
+                        if (! $success) {
+                            Notification::make()
+                                ->title(__('firewall-filament::firewall-filament.rules.notification.move_failed'))
+                                ->body(__('firewall-filament::firewall-filament.rules.notification.move_failed_body', ['ip' => $record['ip_address']]))
+                                ->danger()
+                                ->send();
+
+                            return;
+                        }
 
                         $this->auditLog('move', $record['ip_address'], [
                             'list' => $record['whitelisted'] ? 'whitelist' : 'blacklist',
@@ -150,16 +164,36 @@ class ManageFirewallRules extends Page implements HasTable
                             ->success()
                             ->send();
                     })
-                    ->disabled(!$allowMutations)
-                    ->tooltip(!$allowMutations ? __('firewall-filament::firewall-filament.rules.config_mode.tooltip') : null),
+                    ->disabled(fn (array $record): bool => !$allowMutations || ($record['source'] ?? null) === 'config')
+                    ->tooltip(function (array $record) use ($allowMutations): ?string {
+                        if (($record['source'] ?? null) === 'config') {
+                            return __('firewall-filament::firewall-filament.rules.config_sourced.tooltip');
+                        }
+
+                        return !$allowMutations ? __('firewall-filament::firewall-filament.rules.config_mode.tooltip') : null;
+                    }),
                 TableAction::make('delete')
                     ->label(__('firewall-filament::firewall-filament.rules.action.delete'))
                     ->icon('heroicon-o-trash')
                     ->color('danger')
                     ->requiresConfirmation()
-                    ->action(function (array $record): void {
+                    ->action(function (array $record) use ($allowMutations): void {
+                        if (! $allowMutations || ($record['source'] ?? null) === 'config') {
+                            abort(403);
+                        }
+
                         $adapter = app(RuleStoreAdapter::class);
-                        $adapter->remove($record['ip_address']);
+                        $success = $adapter->remove($record['ip_address']);
+
+                        if (! $success) {
+                            Notification::make()
+                                ->title(__('firewall-filament::firewall-filament.rules.notification.delete_failed'))
+                                ->body(__('firewall-filament::firewall-filament.rules.notification.delete_failed_body', ['ip' => $record['ip_address']]))
+                                ->danger()
+                                ->send();
+
+                            return;
+                        }
 
                         $this->auditLog('remove', $record['ip_address'], [
                             'list' => $record['whitelisted'] ? 'whitelist' : 'blacklist',
@@ -171,8 +205,14 @@ class ManageFirewallRules extends Page implements HasTable
                             ->success()
                             ->send();
                     })
-                    ->disabled(!$allowMutations)
-                    ->tooltip(!$allowMutations ? __('firewall-filament::firewall-filament.rules.config_mode.tooltip') : null),
+                    ->disabled(fn (array $record): bool => !$allowMutations || ($record['source'] ?? null) === 'config')
+                    ->tooltip(function (array $record) use ($allowMutations): ?string {
+                        if (($record['source'] ?? null) === 'config') {
+                            return __('firewall-filament::firewall-filament.rules.config_sourced.tooltip');
+                        }
+
+                        return !$allowMutations ? __('firewall-filament::firewall-filament.rules.config_mode.tooltip') : null;
+                    }),
             ])
             ->bulkActions([
                 BulkAction::make('delete')
@@ -181,21 +221,37 @@ class ManageFirewallRules extends Page implements HasTable
                     ->color('danger')
                     ->requiresConfirmation()
                     ->deselectRecordsAfterCompletion()
-                    ->action(function (Collection $records): void {
+                    ->action(function (Collection $records) use ($allowMutations): void {
+                        if (! $allowMutations) {
+                            abort(403);
+                        }
+
                         $adapter = app(RuleStoreAdapter::class);
-                        $count = 0;
+                        $removed = 0;
+                        $skipped = 0;
 
                         foreach ($records as $record) {
-                            $adapter->remove($record['ip_address']);
+                            if (($record['source'] ?? null) === 'config') {
+                                $skipped++;
+
+                                continue;
+                            }
+
+                            if (! $adapter->remove($record['ip_address'])) {
+                                $skipped++;
+
+                                continue;
+                            }
+
                             $this->auditLog('remove', $record['ip_address'], [
                                 'list' => $record['whitelisted'] ? 'whitelist' : 'blacklist',
                             ]);
-                            $count++;
+                            $removed++;
                         }
 
                         Notification::make()
                             ->title(__('firewall-filament::firewall-filament.rules.notification.bulk_deleted'))
-                            ->body("Removed {$count} rule(s)")
+                            ->body("Removed {$removed} rule(s)" . ($skipped > 0 ? ", skipped {$skipped}" : ''))
                             ->success()
                             ->send();
                     })
@@ -238,7 +294,11 @@ class ManageFirewallRules extends Page implements HasTable
                         ->helperText(__('firewall-filament::firewall-filament.rules.field.whitelist_helper'))
                         ->default(true),
                 ])
-                ->action(function (array $data): void {
+                ->action(function (array $data) use ($allowMutations): void {
+                    if (! $allowMutations) {
+                        abort(403);
+                    }
+
                     if (!$data['whitelisted'] && $this->wouldLockOut($data['ip_address'])) {
                         Notification::make()
                             ->title(__('firewall-filament::firewall-filament.rules.notification.lockout_prevented'))
@@ -250,7 +310,17 @@ class ManageFirewallRules extends Page implements HasTable
                     }
 
                     $adapter = app(RuleStoreAdapter::class);
-                    $adapter->add($data['ip_address'], $data['whitelisted']);
+                    $success = $adapter->add($data['ip_address'], $data['whitelisted']);
+
+                    if (! $success) {
+                        Notification::make()
+                            ->title(__('firewall-filament::firewall-filament.rules.notification.create_failed'))
+                            ->body(__('firewall-filament::firewall-filament.rules.notification.create_failed_body', ['ip' => $data['ip_address']]))
+                            ->danger()
+                            ->send();
+
+                        return;
+                    }
 
                     $this->auditLog('add', $data['ip_address'], null, [
                         'list' => $data['whitelisted'] ? 'whitelist' : 'blacklist',
@@ -272,23 +342,43 @@ class ManageFirewallRules extends Page implements HasTable
                 ->modalHeading(__('firewall-filament::firewall-filament.rules.action.clear_all_heading'))
                 ->modalDescription(__('firewall-filament::firewall-filament.rules.action.clear_all_description'))
                 ->modalSubmitActionLabel(__('firewall-filament::firewall-filament.rules.action.clear_all_confirm'))
-                ->action(function (): void {
-                    $adapter = app(RuleStoreAdapter::class);
-                    $allRules = $adapter->all();
-                    $before = $allRules->map(fn (RuleEntry $e) => [
-                        'ip' => $e->ip_address,
-                        'list' => $e->whitelisted ? 'whitelist' : 'blacklist',
-                    ])->values()->all();
-
-                    foreach ($allRules as $entry) {
-                        $adapter->remove($entry->ip_address);
+                ->action(function () use ($allowMutations): void {
+                    if (! $allowMutations) {
+                        abort(403);
                     }
 
-                    $this->auditLog('clear', null, $before);
+                    $adapter = app(RuleStoreAdapter::class);
+                    $allRules = $adapter->all();
+
+                    $removedEntries = [];
+                    $skipped = 0;
+
+                    foreach ($allRules as $entry) {
+                        if ($entry->source === 'config') {
+                            $skipped++;
+
+                            continue;
+                        }
+
+                        if (! $adapter->remove($entry->ip_address)) {
+                            $skipped++;
+
+                            continue;
+                        }
+
+                        $removedEntries[] = [
+                            'ip' => $entry->ip_address,
+                            'list' => $entry->whitelisted ? 'whitelist' : 'blacklist',
+                        ];
+                    }
+
+                    if (count($removedEntries) > 0) {
+                        $this->auditLog('clear', null, $removedEntries);
+                    }
 
                     Notification::make()
                         ->title(__('firewall-filament::firewall-filament.rules.notification.cleared'))
-                        ->body('Removed ' . count($before) . ' rule(s)')
+                        ->body('Removed ' . count($removedEntries) . ' rule(s)' . ($skipped > 0 ? ", skipped {$skipped}" : ''))
                         ->success()
                         ->send();
                 })

@@ -4,23 +4,37 @@ A [Filament](https://filamentphp.com/) admin panel integration for [magentron/la
 
 ## Requirements
 
-- PHP 8.1+
-- Laravel 10, 11, 12, or 13
-- Filament 3 or 4
+- PHP 8.2+
+- Laravel 11.28+, 12, or 13 (Laravel 10 is **not** supported — Filament 4 requires `illuminate/contracts: ^11.28|^12.0|^13.0`)
+- Filament 4 (Filament 3 is **not** supported on the `main` / `2.x` branch — see [Filament version support](#filament-version-support) below)
 - [magentron/laravel-firewall](https://github.com/magentron/laravel-firewall) 3.x
 
 ### Tested combinations
 
 | PHP | Laravel | Filament |
 |-----|---------|----------|
-| 8.2 | 10      | 3        |
-| 8.2 | 11      | 3        |
-| 8.3 | 11      | 3        |
-| 8.3 | 12      | 3        |
+| 8.2 | 11      | 4        |
+| 8.3 | 11      | 4        |
 | 8.3 | 12      | 4        |
 | 8.3 | 13      | 4        |
 
-Combinations outside this matrix (e.g. PHP 8.1 + Laravel 11, Laravel 10 + Filament 4) are **best effort** — they may work but are not tested in CI and not claimed as supported.
+Combinations outside this matrix are **best effort** — they may work but are not tested in CI and not claimed as supported.
+
+### Filament version support
+
+This package targets **Filament 4 only** on the `main` / `2.x` branch. Filament 3 is not supported. The original PRD left the v3/v4 strategy open (single-codebase shim vs. parallel major branches) and the project has now committed to the parallel-branch path:
+
+- **`2.x` / `main`** — Filament 4 (current).
+- **`1.x`** — Filament 3. **Not yet published.** Would only be cut if there is concrete user demand; open an issue if you need it.
+
+Reason for the split: the v3→v4 divergences in the core classes this package extends cannot be bridged in a single source tree. Specifically:
+
+- `Filament\Pages\Page::$view` is `static` in v3 and **instance** in v4 — a child class cannot declare it both ways, and PHP does not allow polymorphic reconciliation of static vs. instance properties.
+- `$navigationIcon` is `?string` in v3 and `string | BackedEnum | null` in v4 (PHP 8.3 requires invariant static property types on inheritance).
+- `Resource::getSlug()` is parameterless in v3 and `getSlug(?Panel $panel = null)` in v4.
+- Table actions live under `Filament\Tables\Actions\*` in v3 and were consolidated into `Filament\Actions\*` in v4.
+
+A runtime compatibility shim was evaluated and rejected: the static-vs-instance property difference alone would require duplicate class hierarchies, which is strictly worse than two small branches.
 
 ## Installation
 
@@ -168,6 +182,38 @@ FirewallFilamentPlugin::make()
     ->enableWidgets()
     ->enableRuleCountsWidget(true)
     ->enableRecentLogLinesWidget(false);
+```
+
+### Log viewer (best-effort)
+
+`magentron/laravel-firewall` does **not** persist structured access logs — it calls `logger()->info("FIREWALL: …")` with a plain string. This package can show the last N `FIREWALL:`-prefixed lines from a Laravel log file, but it is strictly opt-in and requires **two** config values to be set:
+
+```php
+// config/firewall-filament.php
+return [
+    // Absolute path to the Laravel log file to read.
+    'log_file' => storage_path('logs/laravel.log'),
+
+    // Explicit allowlist of permitted absolute paths. The path in `log_file`
+    // MUST also appear here (after realpath() canonicalization). This is a
+    // security boundary, not a convenience — an empty allowlist disables
+    // log file reading entirely, even if `log_file` is set.
+    'log_file_allowlist' => [
+        storage_path('logs/laravel.log'),
+    ],
+];
+```
+
+Behaviour:
+
+- If **both** `log_file` and a matching `log_file_allowlist` entry are configured, the package binds `LaravelLogFileAdapter` and the status page / `RecentLogLinesWidget` show recent log lines.
+- If `log_file_allowlist` is **empty**, or `log_file` does not match any entry after `realpath()` resolution, the package falls back to `NullLogSourceAdapter` — the status page shows a "logs not configured" message and the widget does not render. This is the default.
+- The adapter opens files read-only, caps scanned bytes at 256 KiB from the end of the file, and truncates individual lines to 4 KiB.
+
+You must also enable the status page on the plugin:
+
+```php
+FirewallFilamentPlugin::make()->enableLogs();
 ```
 
 ## Publishing

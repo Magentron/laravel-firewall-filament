@@ -2,6 +2,7 @@
 
 namespace Magentron\LaravelFirewallFilament\Resources;
 
+use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -14,7 +15,7 @@ class AuditLogResource extends Resource
 {
     protected static ?string $model = AuditLog::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-clipboard-document-list';
 
     public static function getNavigationLabel(): string
     {
@@ -31,7 +32,7 @@ class AuditLogResource extends Resource
         return __('firewall-filament::firewall-filament.audit.plural_model_label');
     }
 
-    public static function getSlug(): string
+    public static function getSlug(?\Filament\Panel $panel = null): string
     {
         return static::getPlugin()->getSlug() . '/audit';
     }

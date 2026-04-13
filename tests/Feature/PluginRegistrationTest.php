@@ -53,9 +53,28 @@ class PluginRegistrationTest extends TestCase
 
         $this->assertContains(FirewallRuleResource::class, $registeredResources);
         $this->assertContains(AuditLogResource::class, $registeredResources);
-        $this->assertContains(FirewallStatusPage::class, $registeredPages);
+        $this->assertNotContains(FirewallStatusPage::class, $registeredPages);
         $this->assertNotContains(FirewallSettingsPage::class, $registeredPages);
         $this->assertEmpty($registeredWidgets);
+    }
+
+    public function test_registers_status_page_when_logs_enabled(): void
+    {
+        $plugin = FirewallFilamentPlugin::make()->enableLogs();
+
+        $registeredPages = [];
+
+        $panel = Mockery::mock(Panel::class);
+        $panel->shouldReceive('resources')->andReturnSelf();
+        $panel->shouldReceive('pages')->with(Mockery::on(function ($pages) use (&$registeredPages) {
+            $registeredPages = $pages;
+            return true;
+        }))->andReturnSelf();
+        $panel->shouldReceive('widgets')->andReturnSelf();
+
+        $plugin->register($panel);
+
+        $this->assertContains(FirewallStatusPage::class, $registeredPages);
     }
 
     public function test_registers_settings_page_when_enabled(): void

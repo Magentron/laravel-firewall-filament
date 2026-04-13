@@ -59,10 +59,12 @@ class FirewallFilamentPlugin implements Plugin
             FirewallRuleResource::class,
             AuditLogResource::class,
         ];
-        $pages = [
-            FirewallStatusPage::class,
-        ];
+        $pages = [];
         $widgets = [];
+
+        if ($this->enableLogs) {
+            $pages[] = FirewallStatusPage::class;
+        }
 
         if ($this->enableWidgets) {
             if ($this->enableRuleCountsWidget) {
@@ -75,10 +77,6 @@ class FirewallFilamentPlugin implements Plugin
 
         if ($this->enableSettings) {
             $pages[] = FirewallSettingsPage::class;
-        }
-
-        if ($this->enableLogs) {
-            // Logs resource will be registered in future stories
         }
 
         $panel

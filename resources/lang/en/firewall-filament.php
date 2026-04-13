@@ -55,11 +55,18 @@ return [
     'rules.notification.cleared' => 'All rules cleared',
     'rules.notification.lockout_prevented' => 'Lockout prevented',
     'rules.notification.lockout_body' => 'Cannot blacklist :ip — it matches your current session IP.',
+    'rules.notification.move_failed' => 'Move failed',
+    'rules.notification.move_failed_body' => 'Could not move :ip. It may be a config-sourced entry (read-only) or the upstream store rejected the change.',
+    'rules.notification.delete_failed' => 'Delete failed',
+    'rules.notification.delete_failed_body' => 'Could not remove :ip. It may be a config-sourced entry (read-only) or the upstream store rejected the change.',
+    'rules.notification.create_failed' => 'Create failed',
+    'rules.notification.create_failed_body' => 'Could not add :ip. The upstream store rejected the change (the entry may already exist on the other list; try moving it instead).',
 
     // Rules config mode
     'rules.config_mode.title' => 'Config Mode Active',
     'rules.config_mode.description' => 'Firewall is running in config mode. Changes made here affect the current process only and will not persist across requests. Enable <code>firewall.use_database</code> to persist changes.',
     'rules.config_mode.tooltip' => 'Mutations are disabled in config mode. Enable firewall.use_database to persist changes.',
+    'rules.config_sourced.tooltip' => 'This entry originates from a config-array rule (e.g. CIDR, country, host, or file) and cannot be modified through the UI. Edit config/firewall.php instead.',
 
     // Status page
     'status.section.statistics' => 'Firewall Statistics',
@@ -95,6 +102,8 @@ return [
     'settings.notification.restored' => 'Settings restored',
     'settings.notification.restored_body' => 'Restored snapshot from :snapshot.',
     'settings.notification.restore_failed' => 'Restore failed',
+    'settings.notification.unauthorized' => 'You are not authorized to modify firewall settings.',
+    'settings.view_only_notice' => 'You have read-only access to these settings. Contact an administrator to request the mutateSettings ability to make changes.',
     'settings.section.file' => 'Settings File',
     'settings.file.path' => 'Settings are persisted to:',
     'settings.file.description' => 'This file is the single source of truth for <code>firewall.enable_log</code> and <code>firewall.log_stack</code>. Values are merged over the published config at boot time.',

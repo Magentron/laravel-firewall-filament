@@ -30,25 +30,25 @@ class LogSourceAdapterTest extends TestCase
 
     public function test_log_file_adapter_implements_interface(): void
     {
-        $adapter = new LaravelLogFileAdapter('/nonexistent/path.log');
+        $adapter = new LaravelLogFileAdapter('/nonexistent/path.log', ['/nonexistent/path.log']);
         $this->assertInstanceOf(LogSourceAdapter::class, $adapter);
     }
 
     public function test_log_file_adapter_not_supported_for_missing_file(): void
     {
-        $adapter = new LaravelLogFileAdapter('/nonexistent/path.log');
+        $adapter = new LaravelLogFileAdapter('/nonexistent/path.log', ['/nonexistent/path.log']);
         $this->assertFalse($adapter->supported());
     }
 
     public function test_log_file_adapter_not_supported_for_empty_path(): void
     {
-        $adapter = new LaravelLogFileAdapter('');
+        $adapter = new LaravelLogFileAdapter('', []);
         $this->assertFalse($adapter->supported());
     }
 
     public function test_log_file_adapter_returns_empty_for_missing_file(): void
     {
-        $adapter = new LaravelLogFileAdapter('/nonexistent/path.log');
+        $adapter = new LaravelLogFileAdapter('/nonexistent/path.log', ['/nonexistent/path.log']);
         $this->assertCount(0, $adapter->recentEntries(10));
     }
 
@@ -64,7 +64,7 @@ class LogSourceAdapterTest extends TestCase
         ]));
 
         try {
-            $adapter = new LaravelLogFileAdapter($tmpFile);
+            $adapter = new LaravelLogFileAdapter($tmpFile, [$tmpFile]);
 
             $this->assertTrue($adapter->supported());
 
@@ -90,7 +90,7 @@ class LogSourceAdapterTest extends TestCase
         ]));
 
         try {
-            $adapter = new LaravelLogFileAdapter($tmpFile);
+            $adapter = new LaravelLogFileAdapter($tmpFile, [$tmpFile]);
             $entries = $adapter->recentEntries(2);
             $entries = is_array($entries) ? $entries : iterator_to_array($entries);
 
@@ -102,13 +102,42 @@ class LogSourceAdapterTest extends TestCase
         }
     }
 
+    public function test_log_file_adapter_rejects_path_not_in_allowlist(): void
+    {
+        $tmpFile = tempnam(sys_get_temp_dir(), 'fw_test_');
+        file_put_contents($tmpFile, '[2026-04-13] local.INFO: FIREWALL: Blocked 1.2.3.4');
+
+        try {
+            $adapter = new LaravelLogFileAdapter($tmpFile, ['/some/other/path.log']);
+
+            $this->assertFalse($adapter->supported());
+            $this->assertCount(0, $adapter->recentEntries(10));
+        } finally {
+            unlink($tmpFile);
+        }
+    }
+
+    public function test_log_file_adapter_rejects_empty_allowlist(): void
+    {
+        $tmpFile = tempnam(sys_get_temp_dir(), 'fw_test_');
+        file_put_contents($tmpFile, '[2026-04-13] local.INFO: FIREWALL: Blocked 1.2.3.4');
+
+        try {
+            $adapter = new LaravelLogFileAdapter($tmpFile, []);
+
+            $this->assertFalse($adapter->supported());
+        } finally {
+            unlink($tmpFile);
+        }
+    }
+
     public function test_log_file_adapter_handles_empty_file(): void
     {
         $tmpFile = tempnam(sys_get_temp_dir(), 'fw_test_');
         file_put_contents($tmpFile, '');
 
         try {
-            $adapter = new LaravelLogFileAdapter($tmpFile);
+            $adapter = new LaravelLogFileAdapter($tmpFile, [$tmpFile]);
             $this->assertCount(0, $adapter->recentEntries(10));
         } finally {
             unlink($tmpFile);

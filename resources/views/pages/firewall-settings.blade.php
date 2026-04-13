@@ -1,13 +1,21 @@
 <x-filament-panels::page>
-    <form wire:submit="save">
+    @if ($this->canMutateSettings())
+        <form wire:submit="save">
+            {{ $this->form }}
+
+            <div class="mt-4">
+                <x-filament::button type="submit" icon="heroicon-o-check">
+                    {{ __('firewall-filament::firewall-filament.settings.action.save') }}
+                </x-filament::button>
+            </div>
+        </form>
+    @else
         {{ $this->form }}
 
-        <div class="mt-4">
-            <x-filament::button type="submit" icon="heroicon-o-check">
-                {{ __('firewall-filament::firewall-filament.settings.action.save') }}
-            </x-filament::button>
-        </div>
-    </form>
+        <p class="mt-4 text-sm text-gray-500 dark:text-gray-400">
+            {{ __('firewall-filament::firewall-filament.settings.view_only_notice') }}
+        </p>
+    @endif
 
     <x-filament::section>
         <x-slot name="heading">{{ __('firewall-filament::firewall-filament.settings.section.file') }}</x-slot>
@@ -48,15 +56,17 @@
                                 @endforeach
                             </div>
                         </div>
-                        <x-filament::button
-                            size="sm"
-                            color="warning"
-                            icon="heroicon-o-arrow-uturn-left"
-                            wire:click="restoreSnapshot('{{ $snapshot['id'] }}')"
-                            wire:confirm="{{ __('firewall-filament::firewall-filament.settings.snapshot.confirm', ['date' => $snapshot['date']]) }}"
-                        >
-                            {{ __('firewall-filament::firewall-filament.settings.snapshot.restore') }}
-                        </x-filament::button>
+                        @if ($this->canMutateSettings())
+                            <x-filament::button
+                                size="sm"
+                                color="warning"
+                                icon="heroicon-o-arrow-uturn-left"
+                                wire:click="restoreSnapshot('{{ $snapshot['id'] }}')"
+                                wire:confirm="{{ __('firewall-filament::firewall-filament.settings.snapshot.confirm', ['date' => $snapshot['date']]) }}"
+                            >
+                                {{ __('firewall-filament::firewall-filament.settings.snapshot.restore') }}
+                            </x-filament::button>
+                        @endif
                     </div>
                 @endforeach
             </div>
