@@ -1,0 +1,38 @@
+{
+    "name": "magentron/laravel-firewall-filament",
+    "description": "Filament admin panel integration for magentron/laravel-firewall — manage IP whitelist/blacklist rules from your Filament dashboard.",
+    "keywords": ["laravel", "filament", "firewall", "admin", "whitelist", "blacklist"],
+    "license": "MIT",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Jeroen D.",
+            "role": "Maintainer"
+        }
+    ],
+    "require": {
+        "php": "^8.1",
+        "magentron/laravel-firewall": "^3.0",
+        "illuminate/support": "^10.0|^11.0|^12.0|^13.0",
+        "filament/filament": "^3.0|^4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Magentron\\LaravelFirewallFilament\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Magentron\\LaravelFirewallFilament\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Magentron\\LaravelFirewallFilament\\FirewallFilamentServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
