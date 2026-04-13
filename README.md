@@ -32,7 +32,7 @@ composer require magentron/laravel-firewall-filament
 
 The service provider is auto-discovered by Laravel. No manual registration is needed.
 
-## Registration
+## Plugin registration
 
 Register the plugin in your Filament panel provider:
 
@@ -43,25 +43,132 @@ public function panel(Panel $panel): Panel
 {
     return $panel
         // ...
-        ->plugin(FirewallFilamentPlugin::make());
+        ->plugin(
+            FirewallFilamentPlugin::make()
+                ->authorizeUsing(fn (object $user, string $ability): bool => $user->is_admin)
+        );
 }
 ```
 
-## Configuration
+## Authorization setup (required)
 
-The plugin exposes fluent configuration methods:
+By default, **all access is denied**. You must configure an authorization callback before any user can access the firewall panel. This is a deliberate secure default.
+
+The callback receives the authenticated user and a string ability name. Return `true` to allow:
 
 ```php
 FirewallFilamentPlugin::make()
-    ->navigationGroup('Security')
-    ->slug('firewall')
-    ->authorizeUsing(fn () => auth()->user()?->is_admin)
-    ->enableSettings()
-    ->enableLogs()
-    ->enableWidgets();
+    ->authorizeUsing(function (object $user, string $ability): bool {
+        // Grant all abilities to admins
+        return $user->hasRole('admin');
+    });
 ```
 
-By default, all admin surfaces **deny access** unless you configure `authorizeUsing()`. This is a secure default — you must explicitly grant access.
+### Abilities
+
+| Ability          | Controls                                    |
+|------------------|---------------------------------------------|
+| `viewRules`      | View the firewall rules list                |
+| `mutateRules`    | Create, move, and delete rules              |
+| `viewLogs`       | View the firewall status / log page         |
+| `viewSettings`   | View the settings page                      |
+| `mutateSettings` | Change and restore settings                 |
+
+You can grant abilities selectively:
+
+```php
+->authorizeUsing(function (object $user, string $ability): bool {
+    if ($user->hasRole('admin')) {
+        return true;
+    }
+
+    // Operators can view but not mutate
+    if ($user->hasRole('operator')) {
+        return in_array($ability, ['viewRules', 'viewLogs']);
+    }
+
+    return false;
+})
+```
+
+### Gate shortcut
+
+If you prefer a single Laravel Gate for all abilities:
+
+```php
+FirewallFilamentPlugin::make()
+    ->authorizeWithGate('manage-firewall');
+```
+
+This checks `Gate::allows('manage-firewall')` for every ability.
+
+## Database mode vs config mode
+
+The underlying `magentron/laravel-firewall` package supports two storage modes:
+
+- **Database mode** (`firewall.use_database = true`): Rules are persisted in the database. Creating, moving, and deleting rules via the Filament panel works fully.
+- **Config mode** (`firewall.use_database = false`): Rules are read from `config/firewall.php` arrays. The panel shows rules as read-only. Mutation actions are visible but disabled with a tooltip explaining why.
+
+**If you want to manage rules from the admin panel, set `use_database` to `true`** in your `config/firewall.php`:
+
+```php
+// config/firewall.php
+'use_database' => true,
+```
+
+Without this, the panel is view-only for rules. You can override this behaviour with `->allowConfigModeMutations()` on the plugin, but changes made in config mode will not persist across requests.
+
+## Settings store
+
+When `->enableSettings()` is active, the plugin provides a UI to edit `firewall.enable_log` and `firewall.log_stack` at runtime. These values are stored in a JSON file (default: `storage/app/firewall-filament-settings.json`) and merged over the firewall config at boot.
+
+**Caveats:**
+
+- The settings file must be writable by the web server. Ensure the `storage/app` directory has appropriate permissions.
+- Settings are merged at boot time via `config()->set()`. If you use `config:cache`, the JSON file values will still take precedence because they are applied after the cached config is loaded.
+- Up to 10 rollback snapshots are retained in `storage/app/firewall-filament-snapshots/`. Each save creates a snapshot of the previous state.
+- Only `firewall.enable_log` and `firewall.log_stack` are writable. Other firewall config keys cannot be changed via the UI.
+
+## Anti-lockout protection
+
+When adding or moving a rule to the blacklist, the plugin detects whether the target IP/CIDR/range would block the current admin's IP address. If it would, the operation is prevented with a warning notification.
+
+**This check covers exact IPs, CIDR notation, and IP ranges.** It does not cover country codes or hostnames since those cannot be reliably resolved to IP addresses at check time. Exercise caution when blacklisting broad patterns.
+
+## Audit trail
+
+Every mutation (rule create, move, delete, clear, settings change, settings restore) is recorded in the `firewall_filament_audit` database table. This table is owned by the package and is always available — it does not depend on `firewall.use_database`.
+
+View the audit log from the "Audit Logs" resource in the Filament panel (requires `viewSettings` ability).
+
+## Optional features
+
+These features are disabled by default and can be enabled on the plugin:
+
+```php
+FirewallFilamentPlugin::make()
+    ->authorizeUsing(fn ($user, $ability) => $user->is_admin)
+    ->enableSettings()          // Settings page (enable_log, log_stack)
+    ->enableLogs()              // Firewall status / log viewer page
+    ->enableWidgets()           // Dashboard widgets (rule counts, recent log lines)
+    ->navigationGroup('Security');
+```
+
+### Widgets
+
+When `->enableWidgets()` is active, two dashboard widgets are registered:
+
+- **Rule Counts** — stat cards showing whitelist count, blacklist count, total rules, and storage mode
+- **Recent Log Lines** — table of the last 10 firewall log entries (only shown when a log source is configured)
+
+Individual widgets can be toggled:
+
+```php
+FirewallFilamentPlugin::make()
+    ->enableWidgets()
+    ->enableRuleCountsWidget(true)
+    ->enableRecentLogLinesWidget(false);
+```
 
 ## Publishing
 
