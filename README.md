@@ -214,6 +214,22 @@ php artisan vendor:publish --tag=firewall-filament-migrations
 
 This is useful if you need to customize the audit log table schema. Migrations are auto-loaded by the package, so publishing is optional.
 
+## Backport Decision Table (v0.1.0..v0.2.0)
+
+Scope discovery reviewed the mandatory coverage set for `v0.1.0..v0.2.0`: `src/**`, `database/**`, `resources/**`, `config/**`, `routes/**`, `tests/**`, `composer.json`, `composer.lock`, `.github/workflows/**`, `README.md`, `CHANGELOG.md`, and release-note artefacts (`CHANGELOG.md` + release commit metadata).
+
+- Paths with changes in this range: `src/**`, `resources/**`, `config/**`, `tests/**`, `composer.json`, `.github/workflows/**`, `README.md`, `CHANGELOG.md`.
+- Paths with no changes in this range: `database/**`, `routes/**`, `composer.lock`.
+
+| Commit | Feature/fix summary | Target files | Risk | Decision | Rationale | Adaptation notes (required for `Adapt for v3`) |
+|---|---|---|---|---|---|---|
+| `057bee3624644a01eb6f612088280ec2168aee67` | Authorization hardening, DB-source correctness, log file allowlist, compatibility scope reset | `.github/workflows/tests.yml`, `CHANGELOG.md`, `README.md`, `composer.json`, `config/firewall-filament.php`, `resources/lang/en/firewall-filament.php`, `resources/views/pages/firewall-settings.blade.php`, `src/Adapters/DatabaseRuleStoreAdapter.php`, `src/Adapters/LaravelLogFileAdapter.php`, `src/FirewallFilamentPlugin.php`, `src/FirewallFilamentServiceProvider.php`, `src/Pages/FirewallSettingsPage.php`, `src/Pages/FirewallStatusPage.php`, `src/Resources/AuditLogResource.php`, `src/Resources/FirewallRuleResource.php`, `src/Resources/FirewallRuleResource/Pages/ManageFirewallRules.php`, `tests/Feature/LivewireCreateAuthTest.php`, `tests/Feature/PluginRegistrationTest.php`, `tests/Feature/RuleCrudTest.php`, `tests/LogSourceAdapterTest.php`, `tests/Support/TestPanelProvider.php` | high | Adapt for v3 | Security and correctness fixes are required for stable v0.1.x, but this commit mixes in Filament 4/Laravel 11+ signature and support-window changes. | Apply security/correctness changes to `src/Resources/FirewallRuleResource/Pages/ManageFirewallRules.php`, `src/Pages/FirewallSettingsPage.php`, `src/Adapters/DatabaseRuleStoreAdapter.php`, `src/Adapters/LaravelLogFileAdapter.php`, and matching tests; do **not** copy Filament 4-only API migrations in `src/FirewallFilamentPlugin.php`, `src/Resources/AuditLogResource.php`, `src/Resources/FirewallRuleResource.php`, or support-floor updates in `composer.json`/`.github/workflows/tests.yml`. |
+| `b72c24f135a22dd021a78a54ed1c15b5c2a696ea` | Live authorization re-check, memoised DB reads, refactor cleanup, log misconfiguration warning | `config/firewall-filament.php`, `resources/lang/en/firewall-filament.php`, `src/Adapters/ConfigRuleStoreAdapter.php`, `src/Adapters/DatabaseRuleStoreAdapter.php`, `src/Adapters/RuleStoreAdapter.php`, `src/FirewallFilamentServiceProvider.php`, `src/Pages/FirewallSettingsPage.php`, `src/Pages/FirewallStatusPage.php`, `src/Resources/FirewallRuleResource/Pages/ManageFirewallRules.php`, `tests/Feature/LivewireCreateAuthTest.php`, `tests/Feature/LivewireMutationAuthTest.php` | medium | Adapt for v3 | Runtime hardening/performance changes are valuable for backport; touched code is mostly portable but contains Filament 4 naming/signature assumptions. | Port helper-level logic and guard flow in `src/Resources/FirewallRuleResource/Pages/ManageFirewallRules.php`, adapter memoisation/interface updates in `src/Adapters/DatabaseRuleStoreAdapter.php` + `src/Adapters/RuleStoreAdapter.php` + `src/Adapters/ConfigRuleStoreAdapter.php`, and warning path in `src/FirewallFilamentServiceProvider.php`; adjust action class/import usage and any method signatures to Filament 3 equivalents during port. |
+| `e792e8e0c54246c8c5cbe69289b88b77799b4962` | v0.2.0 release-note cut | `CHANGELOG.md` | low | Exclude | Release-tag/changelog cut for v0.2.0 is historical metadata and should not be replayed into v0.1.x backport commits. | n/a |
+| `fc8557910dbb2ad7c85d610e85c7448a3344b22b` | Docs branch-language cleanup referencing v0.2.0/v0.1.0 tags | `CHANGELOG.md`, `README.md` | low | Backport | Documentation clarification is version-management guidance and remains valid when maintaining a backport branch. | n/a |
+
+Explicit exclusion: Filament UI redesign work and Filament 4-only UI/API migration changes are out of scope for backport into the Filament 3 maintenance line.
+
 ## License
 
 MIT. See [LICENSE](LICENSE) for details.
