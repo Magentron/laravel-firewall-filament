@@ -35,6 +35,26 @@ Tagging strategy:
 - Do not create `v0.1.x` tags from `main`.
 - Reserve `main` tags for the Filament 4 line (`v0.2.0+`).
 
+### Filament 3 adaptation notes (`filament/v3` lane)
+
+When applying `v0.2.0` changes to the `filament/v3` backport lane, keep these translation rules:
+
+| Area | Adaptation rule | Target files |
+|---|---|---|
+| Action namespaces | Keep Filament 3 split action classes: header actions use `Filament\Actions\Action`, table row actions use `Filament\Tables\Actions\Action` (aliased as `TableAction`), and bulk actions use `Filament\Tables\Actions\BulkAction`. | `src/Resources/FirewallRuleResource/Pages/ManageFirewallRules.php`, `src/Pages/FirewallSettingsPage.php` |
+| Slug signatures | Keep resource/page slugs on the Filament 3-compatible signature `getSlug(?Panel $panel = null): string`. | `src/Resources/FirewallRuleResource.php`, `src/Resources/AuditLogResource.php`, `src/Pages/FirewallStatusPage.php`, `src/Pages/FirewallSettingsPage.php` |
+| Static property/type differences | Preserve Filament 3-compatible static declarations (for example `protected static ?string $model`, `protected static string|BackedEnum|null $navigationIcon`) instead of v4-specific alternatives. | `src/Resources/FirewallRuleResource.php`, `src/Resources/AuditLogResource.php`, `src/Pages/FirewallStatusPage.php`, `src/Pages/FirewallSettingsPage.php` |
+| UI parity | Keep behaviour equivalent (same actions, visibility/disabled guards, notifications, and translations) and avoid redesign changes. | `src/Resources/**`, `src/Pages/**`, `resources/views/**`, `resources/lang/**` |
+
+Backport lane dependency constraints (`filament/v3`) are:
+
+- `php`: `^8.1`
+- `magentron/laravel-firewall`: `^3.0`
+- `illuminate/support`: `^10.0|^11.0|^12.0|^13.0`
+- `filament/filament`: `^3.0` only (no `^4.0`)
+- `orchestra/testbench` (`require-dev`): `^8.0|^9.0|^10.0`
+- `phpunit/phpunit` (`require-dev`): `^10.0|^11.0`
+
 ## Installation
 
 Install the package via Composer:

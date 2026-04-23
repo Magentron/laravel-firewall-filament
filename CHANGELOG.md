@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Notes
 - Release lane policy: `main` remains the Filament 4 line (`v0.2.0+`), while `filament/v3` remains the Filament 3 maintenance line (`v0.1.x`).
 - `v0.1.x` patch/minor tags are cut from `filament/v3` only.
+- Filament 3 backport planning now defines explicit v3 adaptation constraints for action namespaces, slug signatures, static property typing, and v0.1.x Composer guardrails.
 
 ## [0.1.0] - 2026-04-13
 
