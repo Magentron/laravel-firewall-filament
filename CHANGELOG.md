@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Release lane policy: `main` remains the Filament 4 line (`v0.2.0+`), while `filament/v3` remains the Filament 3 maintenance line (`v0.1.x`).
 - `v0.1.x` patch/minor tags are cut from `filament/v3` only.
 - Filament 3 backport planning now defines explicit v3 adaptation constraints for action namespaces, slug signatures, static property typing, and v0.1.x Composer guardrails.
+- `v0.1.x` now has an executable compatibility baseline/matrix (PHP 8.1-8.3, Laravel 10-13, Filament 3) with mandatory domain pass criteria and a `filament/v3` release-gate workflow.
 
 ## [0.1.0] - 2026-04-13
 

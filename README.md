@@ -9,18 +9,45 @@ A [Filament](https://filamentphp.com/) admin panel integration for [magentron/la
 - Filament 3 or 4
 - [magentron/laravel-firewall](https://github.com/magentron/laravel-firewall) 3.x
 
-### Tested combinations
+### Compatibility Baseline (`v0.1.x` / `filament/v3`)
 
-| PHP | Laravel | Filament |
-|-----|---------|----------|
-| 8.2 | 10      | 3        |
-| 8.2 | 11      | 3        |
-| 8.3 | 11      | 3        |
-| 8.3 | 12      | 3        |
-| 8.3 | 12      | 4        |
-| 8.3 | 13      | 4        |
+The `v0.1.x` maintenance lane is locked to Filament 3 and has this minimum baseline:
 
-Combinations outside this matrix (e.g. PHP 8.1 + Laravel 11, Laravel 10 + Filament 4) are **best effort** — they may work but are not tested in CI and not claimed as supported.
+- PHP `8.1`
+- Laravel `10`
+- Filament `3`
+
+Supported majors for this lane are PHP `8.1-8.3`, Laravel `10-13`, and Filament `3.x`. Baseline changes must be decided before implementation work begins and then mirrored in the CI matrix.
+
+### CI matrix (`v0.1.x`)
+
+| PHP | Laravel | Filament | Testbench |
+|-----|---------|----------|-----------|
+| 8.1 | 10      | 3        | 8         |
+| 8.2 | 11      | 3        | 9         |
+| 8.3 | 12      | 3        | 10        |
+| 8.3 | 13      | 3        | 10        |
+
+These combinations are executed in `.github/workflows/tests.yml` for pushes and pull requests on both `main` and `filament/v3`.
+
+### Mandatory test domains and pass criteria
+
+The backport lane requires explicit coverage in these domains:
+
+| Domain | Primary tests |
+|---|---|
+| Rule CRUD | `tests/Feature/RuleCrudTest.php` |
+| Auth gates | `tests/Feature/AuthorizationFeatureTest.php`, `tests/Feature/LivewireMutationAuthTest.php`, `tests/Feature/SettingsMutationAuthTest.php` |
+| Config mode vs database mode | `tests/Feature/ConfigModeTest.php`, `tests/DatabaseRuleStoreAdapterTest.php` |
+| Log adapter allowlisting | `tests/LogSourceAdapterTest.php`, `tests/Feature/ServiceProviderTest.php` |
+| Settings allowlist/path hardening | `tests/SettingsStoreTest.php`, `tests/Feature/SettingsMutationAuthTest.php` |
+| Audit logging | `tests/Feature/AuditTrailTest.php`, `tests/AuditLoggerTest.php` |
+
+Pass criteria for backport acceptance:
+
+- All existing and new tests pass in every CI matrix job.
+- Mandatory domains are not skipped (`phpunit` runs with `--fail-on-skipped --fail-on-incomplete`).
+- A backport pull request targeting `filament/v3` is not releasable unless the full matrix is green (enforced by the `v0.1.x Release Gate` job).
 
 ## Branch and release lanes
 
