@@ -22,10 +22,10 @@ Combinations outside this matrix are **best effort** — they may work but are n
 
 ### Filament version support
 
-From **v0.2.0 onwards**, this package targets **Filament 4 only**. Filament 3 is not supported. The original PRD left the v3/v4 strategy open (single-codebase shim vs. parallel major branches) and the project has now committed to the clean-break path:
+From **v0.2.0 onwards**, this package targets **Filament 4 only** on `main`. Filament 3 is not supported on `main`. The original PRD left the v3/v4 strategy open (single-codebase shim vs. parallel major branches) and the project has committed to the clean-break path with a parallel maintenance lane:
 
-- **v0.2.0+ (current `main`)** — Filament 4.
-- **v0.1.0** — the only release with Filament 3 support. No maintained `1.x` branch exists; a backport branch would only be cut if there is concrete user demand. Open an issue if you need it.
+- **v0.2.x (current `main`)** — Filament 4. Mainline development and releases happen on `main` only.
+- **v0.1.x (`filament/v3` branch)** — Filament 3 maintenance lane. Current tags: `v0.1.0`, `v0.1.1`, `v0.1.2`. Supported: PHP 8.1–8.3, Laravel 10–12, Filament 3. Filament 3 does not support Laravel 13 (it requires `illuminate/support ^10.45|^11.0|^12.0`), so the backport lane caps at Laravel 12. `v0.1.x` patch/minor tags are cut from `filament/v3` only. See the `filament/v3` branch README and `docs/releases/v0.1.x-backport.md` for the full backport support contract.
 
 Reason for the split: the v3→v4 divergences in the core classes this package extends cannot be bridged in a single source tree. Specifically:
 
