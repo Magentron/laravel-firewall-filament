@@ -3,11 +3,13 @@
 namespace Magentron\LaravelFirewallFilament\Tests\Feature;
 
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Schema;
 use Magentron\LaravelFirewallFilament\Adapters\DatabaseRuleStoreAdapter;
 use Magentron\LaravelFirewallFilament\Adapters\RuleEntry;
 use Magentron\LaravelFirewallFilament\Tests\TestCase;
 use Mockery;
 use PragmaRX\Firewall\Vendor\Laravel\Facade as Firewall;
+use PragmaRX\Firewall\Vendor\Laravel\Models\Firewall as FirewallModel;
 
 class RuleCrudTest extends TestCase
 {
@@ -16,6 +18,15 @@ class RuleCrudTest extends TestCase
         parent::setUp();
 
         $this->app->bind('firewall', fn () => new \stdClass());
+
+        if (! Schema::hasTable('firewall')) {
+            Schema::create('firewall', function ($table) {
+                $table->increments('id');
+                $table->string('ip_address', 39)->unique();
+                $table->boolean('whitelisted')->default(false);
+                $table->timestamps();
+            });
+        }
     }
 
     protected function tearDown(): void
@@ -60,6 +71,7 @@ class RuleCrudTest extends TestCase
 
     public function test_move_rule_between_lists(): void
     {
+        Firewall::shouldReceive('find')->with('10.0.0.1')->once()->andReturnNull();
         Firewall::shouldReceive('remove')->with('10.0.0.1')->once()->andReturn(true);
         Firewall::shouldReceive('blacklist')->with('10.0.0.1', true)->once()->andReturn(true);
 
@@ -69,16 +81,37 @@ class RuleCrudTest extends TestCase
 
     public function test_delete_rule(): void
     {
+        Firewall::shouldReceive('find')->with('10.0.0.1')->once()->andReturnNull();
         Firewall::shouldReceive('remove')->with('10.0.0.1')->once()->andReturn(true);
 
         $adapter = new DatabaseRuleStoreAdapter();
         $this->assertTrue($adapter->remove('10.0.0.1'));
     }
 
+    public function test_cannot_delete_config_sourced_entry(): void
+    {
+        $this->app['config']->set('firewall.use_database', true);
+
+        $model = (object) ['ip_address' => '10.0.0.1', 'whitelisted' => true];
+        Firewall::shouldReceive('find')->with('10.0.0.1')->once()->andReturn($model);
+        Firewall::shouldNotReceive('remove');
+
+        $adapter = new DatabaseRuleStoreAdapter();
+        $this->assertFalse($adapter->remove('10.0.0.1'));
+    }
+
     public function test_distinguishes_config_from_database_entries(): void
     {
+        $this->app['config']->set('firewall.use_database', true);
         $this->app['config']->set('firewall.whitelist', ['10.0.0.1']);
         $this->app['config']->set('firewall.blacklist', []);
+
+        FirewallModel::query()->insert([
+            'ip_address' => '10.0.0.2',
+            'whitelisted' => false,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
 
         $models = new Collection([
             (object) ['ip_address' => '10.0.0.1', 'whitelisted' => true],
@@ -106,6 +139,7 @@ class RuleCrudTest extends TestCase
 
     public function test_find_returns_entry_with_source_tag(): void
     {
+        $this->app['config']->set('firewall.use_database', true);
         $this->app['config']->set('firewall.whitelist', ['1.2.3.4']);
         $this->app['config']->set('firewall.blacklist', []);
 

@@ -2,6 +2,7 @@
 
 namespace Magentron\LaravelFirewallFilament\Pages;
 
+use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
@@ -11,6 +12,7 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Filament\Panel;
 use Magentron\LaravelFirewallFilament\Events\FirewallSettingsChanged;
 use Magentron\LaravelFirewallFilament\FirewallFilamentPlugin;
 use Magentron\LaravelFirewallFilament\Support\AuditLogger;
@@ -20,7 +22,7 @@ class FirewallSettingsPage extends Page implements HasForms
 {
     use InteractsWithForms;
 
-    protected static ?string $navigationIcon = 'heroicon-o-cog-6-tooth';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-cog-6-tooth';
 
     public static function getNavigationLabel(): string
     {
@@ -32,13 +34,13 @@ class FirewallSettingsPage extends Page implements HasForms
         return __('firewall-filament::firewall-filament.settings.title');
     }
 
-    protected static string $view = 'firewall-filament::pages.firewall-settings';
+    protected string $view = 'firewall-filament::pages.firewall-settings';
 
     public bool $enable_log = false;
 
     public ?string $log_stack = null;
 
-    public static function getSlug(): string
+    public static function getSlug(?Panel $panel = null): string
     {
         return static::getPlugin()->getSlug() . '/settings';
     }
@@ -95,6 +97,10 @@ class FirewallSettingsPage extends Page implements HasForms
 
     public function save(): void
     {
+        if (! $this->canMutateSettings()) {
+            abort(403);
+        }
+
         $data = $this->form->getState();
         $store = app(SettingsStore::class);
 
@@ -124,6 +130,10 @@ class FirewallSettingsPage extends Page implements HasForms
 
     public function restoreSnapshot(string $snapshotId): void
     {
+        if (! $this->canMutateSettings()) {
+            abort(403);
+        }
+
         $store = app(SettingsStore::class);
 
         try {

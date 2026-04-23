@@ -4,16 +4,17 @@ namespace Magentron\LaravelFirewallFilament\Adapters;
 
 use Illuminate\Support\Collection;
 use PragmaRX\Firewall\Vendor\Laravel\Facade as Firewall;
+use PragmaRX\Firewall\Vendor\Laravel\Models\Firewall as FirewallModel;
 
 class DatabaseRuleStoreAdapter implements RuleStoreAdapter
 {
     public function all(): Collection
     {
-        $configIps = $this->getConfigIps();
+        $databaseIps = $this->getDatabaseIps();
 
-        return Firewall::all()->map(function ($model) use ($configIps) {
+        return Firewall::all()->map(function ($model) use ($databaseIps) {
             $ip = $model->ip_address;
-            $source = isset($configIps[$ip]) ? 'config' : 'database';
+            $source = isset($databaseIps[$ip]) ? 'database' : 'config';
 
             return new RuleEntry(
                 ip_address: $ip,
@@ -31,8 +32,8 @@ class DatabaseRuleStoreAdapter implements RuleStoreAdapter
             return null;
         }
 
-        $configIps = $this->getConfigIps();
-        $source = isset($configIps[$ip]) ? 'config' : 'database';
+        $databaseIps = $this->getDatabaseIps();
+        $source = isset($databaseIps[$ip]) ? 'database' : 'config';
 
         return new RuleEntry(
             ip_address: $model->ip_address,
@@ -50,31 +51,45 @@ class DatabaseRuleStoreAdapter implements RuleStoreAdapter
 
     public function remove(string $ip): bool
     {
+        if ($this->isConfigSourced($ip)) {
+            return false;
+        }
+
         return Firewall::remove($ip);
     }
 
     public function move(string $ip, bool $whitelisted): bool
     {
-        $this->remove($ip);
+        if ($this->isConfigSourced($ip)) {
+            return false;
+        }
+
+        $removed = Firewall::remove($ip);
+
+        if (! $removed) {
+            return false;
+        }
 
         return $this->add($ip, $whitelisted, true);
     }
 
-    private function getConfigIps(): array
+    private function isConfigSourced(string $ip): bool
     {
-        $whitelist = (array) config('firewall.whitelist', []);
-        $blacklist = (array) config('firewall.blacklist', []);
+        $entry = $this->find($ip);
 
-        $configIps = [];
+        return $entry !== null && $entry->source === 'config';
+    }
 
-        foreach ($whitelist as $ip) {
-            $configIps[$ip] = true;
+    private function getDatabaseIps(): array
+    {
+        if (! config('firewall.use_database')) {
+            return [];
         }
 
-        foreach ($blacklist as $ip) {
-            $configIps[$ip] = true;
+        try {
+            return FirewallModel::query()->pluck('ip_address', 'ip_address')->all();
+        } catch (\Throwable) {
+            return [];
         }
-
-        return $configIps;
     }
 }

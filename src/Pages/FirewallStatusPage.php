@@ -2,7 +2,9 @@
 
 namespace Magentron\LaravelFirewallFilament\Pages;
 
+use BackedEnum;
 use Filament\Pages\Page;
+use Filament\Panel;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
@@ -18,7 +20,7 @@ class FirewallStatusPage extends Page implements HasTable
 {
     use InteractsWithTable;
 
-    protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-chart-bar';
 
     public static function getNavigationLabel(): string
     {
@@ -30,9 +32,9 @@ class FirewallStatusPage extends Page implements HasTable
         return __('firewall-filament::firewall-filament.status.title');
     }
 
-    protected static string $view = 'firewall-filament::pages.firewall-status';
+    protected string $view = 'firewall-filament::pages.firewall-status';
 
-    public static function getSlug(): string
+    public static function getSlug(?Panel $panel = null): string
     {
         return static::getPlugin()->getSlug() . '/status';
     }

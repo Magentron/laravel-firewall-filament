@@ -60,6 +60,7 @@ return [
     'rules.config_mode.title' => 'Config Mode Active',
     'rules.config_mode.description' => 'Firewall is running in config mode. Changes made here affect the current process only and will not persist across requests. Enable <code>firewall.use_database</code> to persist changes.',
     'rules.config_mode.tooltip' => 'Mutations are disabled in config mode. Enable firewall.use_database to persist changes.',
+    'rules.config_sourced.tooltip' => 'This entry originates from a config-array rule and cannot be modified through the UI.',
 
     // Status page
     'status.section.statistics' => 'Firewall Statistics',
