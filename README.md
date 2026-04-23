@@ -22,6 +22,19 @@ A [Filament](https://filamentphp.com/) admin panel integration for [magentron/la
 
 Combinations outside this matrix (e.g. PHP 8.1 + Laravel 11, Laravel 10 + Filament 4) are **best effort** — they may work but are not tested in CI and not claimed as supported.
 
+## Branch and release lanes
+
+This repository uses two release lanes to keep Filament 3 backports isolated from Filament 4 mainline work:
+
+- `main` is the Filament 4 line and publishes `v0.2.0+` releases.
+- `filament/v3` is the Filament 3 maintenance line and publishes `v0.1.x` releases.
+
+Tagging strategy:
+
+- Create `v0.1.x` patch/minor tags from `filament/v3` only.
+- Do not create `v0.1.x` tags from `main`.
+- Reserve `main` tags for the Filament 4 line (`v0.2.0+`).
+
 ## Installation
 
 Install the package via Composer:
