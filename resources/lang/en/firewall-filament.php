@@ -53,6 +53,8 @@ return [
     'rules.notification.bulk_deleted' => 'Rules deleted',
     'rules.notification.created' => 'Rule created',
     'rules.notification.cleared' => 'All rules cleared',
+    'rules.notification.failed' => 'Rule update failed',
+    'rules.notification.failed_body' => 'The requested rule mutation could not be completed.',
     'rules.notification.lockout_prevented' => 'Lockout prevented',
     'rules.notification.lockout_body' => 'Cannot blacklist :ip — it matches your current session IP.',
 

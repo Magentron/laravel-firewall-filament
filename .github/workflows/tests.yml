@@ -29,7 +29,7 @@ jobs:
           - php: '8.3'
             laravel: '13.*'
             filament: '3.*'
-            testbench: '10.*'
+            testbench: '11.*'
 
     name: PHP ${{ matrix.php }} / Laravel ${{ matrix.laravel }} / Filament ${{ matrix.filament }}
 
@@ -60,5 +60,6 @@ jobs:
     steps:
       - name: Require green v0.1.x compatibility matrix
         run: |
+          echo "Gate is informational; enforcement comes from needs: tests and branch protection."
           echo "All v0.1.x compatibility matrix jobs passed."
           echo "Backport PR is releasable from filament/v3."

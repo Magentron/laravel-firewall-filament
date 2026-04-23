@@ -6,7 +6,7 @@ A [Filament](https://filamentphp.com/) admin panel integration for [magentron/la
 
 - PHP 8.1+
 - Laravel 10, 11, 12, or 13
-- Filament 3 or 4
+- Filament 3
 - [magentron/laravel-firewall](https://github.com/magentron/laravel-firewall) 3.x
 
 ## Version support
@@ -35,7 +35,7 @@ Supported majors for this lane are PHP `8.1-8.3`, Laravel `10-13`, and Filament 
 | 8.1 | 10      | 3        | 8         |
 | 8.2 | 11      | 3        | 9         |
 | 8.3 | 12      | 3        | 10        |
-| 8.3 | 13      | 3        | 10        |
+| 8.3 | 13      | 3        | 11        |
 
 These combinations are executed in `.github/workflows/tests.yml` for pushes and pull requests on both `main` and `filament/v3`.
 
@@ -79,7 +79,7 @@ When applying `v0.2.0` changes to the `filament/v3` backport lane, keep these tr
 |---|---|---|
 | Action namespaces | Keep Filament 3 split action classes: header actions use `Filament\Actions\Action`, table row actions use `Filament\Tables\Actions\Action` (aliased as `TableAction`), and bulk actions use `Filament\Tables\Actions\BulkAction`. | `src/Resources/FirewallRuleResource/Pages/ManageFirewallRules.php`, `src/Pages/FirewallSettingsPage.php` |
 | Slug signatures | Keep resource/page slugs on the Filament 3-compatible signature `getSlug(?Panel $panel = null): string`. | `src/Resources/FirewallRuleResource.php`, `src/Resources/AuditLogResource.php`, `src/Pages/FirewallStatusPage.php`, `src/Pages/FirewallSettingsPage.php` |
-| Static property/type differences | Preserve Filament 3-compatible static declarations (for example `protected static ?string $model`, `protected static string|BackedEnum|null $navigationIcon`) instead of v4-specific alternatives. | `src/Resources/FirewallRuleResource.php`, `src/Resources/AuditLogResource.php`, `src/Pages/FirewallStatusPage.php`, `src/Pages/FirewallSettingsPage.php` |
+| Static property/type differences | Preserve Filament 3-compatible static declarations (for example `protected static ?string $model`, `protected static ?string $navigationIcon`) instead of v4-specific alternatives. | `src/Resources/FirewallRuleResource.php`, `src/Resources/AuditLogResource.php`, `src/Pages/FirewallStatusPage.php`, `src/Pages/FirewallSettingsPage.php` |
 | UI parity | Keep behaviour equivalent (same actions, visibility/disabled guards, notifications, and translations) and avoid redesign changes. | `src/Resources/**`, `src/Pages/**`, `resources/views/**`, `resources/lang/**` |
 
 Backport lane dependency constraints (`filament/v3`) are:
@@ -88,7 +88,7 @@ Backport lane dependency constraints (`filament/v3`) are:
 - `magentron/laravel-firewall`: `^3.0`
 - `illuminate/support`: `^10.0|^11.0|^12.0|^13.0`
 - `filament/filament`: `^3.0` only (no `^4.0`)
-- `orchestra/testbench` (`require-dev`): `^8.0|^9.0|^10.0`
+- `orchestra/testbench` (`require-dev`): `^8.0|^9.0|^10.0|^11.0`
 - `phpunit/phpunit` (`require-dev`): `^10.0|^11.0`
 
 ## Installation

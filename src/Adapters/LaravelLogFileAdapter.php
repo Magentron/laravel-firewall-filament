@@ -10,6 +10,17 @@ class LaravelLogFileAdapter implements LogSourceAdapter
     private const MAX_LINE_LENGTH = 4096;
     private const PREFIX = 'FIREWALL:';
 
+    /**
+     * Process-lifetime cache for resolved paths.
+     *
+     * Useful for repeated checks in a single worker/request lifecycle. In long-lived
+     * runtimes (for example Octane workers), updates to filesystem paths are not
+     * reflected until the process is restarted.
+     *
+     * @var array<string, string|false>
+     */
+    private static array $realpathCache = [];
+
     private readonly ?string $resolvedPath;
 
     /**
@@ -35,7 +46,7 @@ class LaravelLogFileAdapter implements LogSourceAdapter
             return null;
         }
 
-        $real = realpath($logPath);
+        $real = $this->cachedRealpath($logPath);
 
         if ($real === false) {
             return null;
@@ -46,7 +57,7 @@ class LaravelLogFileAdapter implements LogSourceAdapter
                 continue;
             }
 
-            $allowedReal = realpath($allowed);
+            $allowedReal = $this->cachedRealpath($allowed);
 
             if ($allowedReal !== false && $allowedReal === $real) {
                 return $real;
@@ -54,6 +65,15 @@ class LaravelLogFileAdapter implements LogSourceAdapter
         }
 
         return null;
+    }
+
+    private function cachedRealpath(string $path): string|false
+    {
+        if (! array_key_exists($path, self::$realpathCache)) {
+            self::$realpathCache[$path] = realpath($path);
+        }
+
+        return self::$realpathCache[$path];
     }
 
     public function recentEntries(int $limit): iterable

@@ -2,10 +2,8 @@
 
 namespace Magentron\LaravelFirewallFilament\Resources;
 
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Panel;
-use Filament\Schemas\Schema;
 use Magentron\LaravelFirewallFilament\Adapters\RuleEntry;
 use Magentron\LaravelFirewallFilament\FirewallFilamentPlugin;
 use Magentron\LaravelFirewallFilament\Resources\FirewallRuleResource\Pages;
@@ -14,7 +12,7 @@ class FirewallRuleResource extends Resource
 {
     protected static ?string $model = null;
 
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-shield-check';
+    protected static ?string $navigationIcon = 'heroicon-o-shield-check';
 
     public static function getNavigationLabel(): string
     {

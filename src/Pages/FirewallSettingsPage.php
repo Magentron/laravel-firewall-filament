@@ -2,7 +2,6 @@
 
 namespace Magentron\LaravelFirewallFilament\Pages;
 
-use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
@@ -22,7 +21,7 @@ class FirewallSettingsPage extends Page implements HasForms
 {
     use InteractsWithForms;
 
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-cog-6-tooth';
+    protected static ?string $navigationIcon = 'heroicon-o-cog-6-tooth';
 
     public static function getNavigationLabel(): string
     {
@@ -34,7 +33,7 @@ class FirewallSettingsPage extends Page implements HasForms
         return __('firewall-filament::firewall-filament.settings.title');
     }
 
-    protected string $view = 'firewall-filament::pages.firewall-settings';
+    protected static string $view = 'firewall-filament::pages.firewall-settings';
 
     public bool $enable_log = false;
 
@@ -178,6 +177,7 @@ class FirewallSettingsPage extends Page implements HasForms
         return app(SettingsStore::class)->getSettingsFilePath();
     }
 
+    /** @internal Public for test page doubles. */
     public function canMutateSettings(): bool
     {
         return static::getPlugin()->can('mutateSettings');

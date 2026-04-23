@@ -71,6 +71,8 @@ class RuleCrudTest extends TestCase
 
     public function test_move_rule_between_lists(): void
     {
+        $this->app['config']->set('firewall.use_database', true);
+
         Firewall::shouldReceive('find')->with('10.0.0.1')->once()->andReturnNull();
         Firewall::shouldReceive('remove')->with('10.0.0.1')->once()->andReturn(true);
         Firewall::shouldReceive('blacklist')->with('10.0.0.1', true)->once()->andReturn(true);
@@ -81,6 +83,8 @@ class RuleCrudTest extends TestCase
 
     public function test_delete_rule(): void
     {
+        $this->app['config']->set('firewall.use_database', true);
+
         Firewall::shouldReceive('find')->with('10.0.0.1')->once()->andReturnNull();
         Firewall::shouldReceive('remove')->with('10.0.0.1')->once()->andReturn(true);
 

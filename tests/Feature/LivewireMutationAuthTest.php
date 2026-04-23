@@ -3,6 +3,8 @@
 namespace Magentron\LaravelFirewallFilament\Tests\Feature;
 
 use Filament\Actions\Action;
+use Magentron\LaravelFirewallFilament\Adapters\DatabaseRuleStoreAdapter;
+use Magentron\LaravelFirewallFilament\Adapters\RuleStoreAdapter;
 use Magentron\LaravelFirewallFilament\Resources\FirewallRuleResource\Pages\ManageFirewallRules;
 use Magentron\LaravelFirewallFilament\Tests\TestCase;
 use Mockery;
@@ -89,6 +91,30 @@ class LivewireMutationAuthTest extends TestCase
 
         $this->invokeActionClosure($createAction, [
             'ip_address' => '10.0.0.43',
+            'whitelisted' => false,
+        ]);
+
+        $this->addToAssertionCount(1);
+    }
+
+    public function test_create_action_allows_with_permission_in_database_mode(): void
+    {
+        $this->app['config']->set('firewall.use_database', true);
+
+        $this->assertInstanceOf(DatabaseRuleStoreAdapter::class, app(RuleStoreAdapter::class));
+
+        Firewall::shouldReceive('blacklist')
+            ->with('10.0.0.44', false)
+            ->once()
+            ->andReturn(true);
+
+        $page = new TestableManageFirewallRules();
+        $page->allowMutations = true;
+
+        $createAction = $this->getHeaderActionNamed($page, 'create');
+
+        $this->invokeActionClosure($createAction, [
+            'ip_address' => '10.0.0.44',
             'whitelisted' => false,
         ]);
 

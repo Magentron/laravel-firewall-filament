@@ -8,6 +8,8 @@ use PragmaRX\Firewall\Vendor\Laravel\Models\Firewall as FirewallModel;
 
 class DatabaseRuleStoreAdapter implements RuleStoreAdapter
 {
+    private ?array $databaseIpsCache = null;
+
     public function all(): Collection
     {
         $databaseIps = $this->getDatabaseIps();
@@ -32,8 +34,7 @@ class DatabaseRuleStoreAdapter implements RuleStoreAdapter
             return null;
         }
 
-        $databaseIps = $this->getDatabaseIps();
-        $source = isset($databaseIps[$ip]) ? 'database' : 'config';
+        $source = $this->isDatabaseSourcedIp($ip) ? 'database' : 'config';
 
         return new RuleEntry(
             ip_address: $model->ip_address,
@@ -44,6 +45,8 @@ class DatabaseRuleStoreAdapter implements RuleStoreAdapter
 
     public function add(string $ip, bool $whitelisted, bool $force = false): bool
     {
+        $this->databaseIpsCache = null;
+
         return $whitelisted
             ? Firewall::whitelist($ip, $force)
             : Firewall::blacklist($ip, $force);
@@ -55,16 +58,14 @@ class DatabaseRuleStoreAdapter implements RuleStoreAdapter
             return false;
         }
 
+        $this->databaseIpsCache = null;
+
         return Firewall::remove($ip);
     }
 
     public function move(string $ip, bool $whitelisted): bool
     {
-        if ($this->isConfigSourced($ip)) {
-            return false;
-        }
-
-        $removed = Firewall::remove($ip);
+        $removed = $this->remove($ip);
 
         if (! $removed) {
             return false;
@@ -75,21 +76,53 @@ class DatabaseRuleStoreAdapter implements RuleStoreAdapter
 
     private function isConfigSourced(string $ip): bool
     {
+        if (! $this->usesDatabaseStorage()) {
+            return false;
+        }
+
         $entry = $this->find($ip);
 
         return $entry !== null && $entry->source === 'config';
     }
 
-    private function getDatabaseIps(): array
+    private function isDatabaseSourcedIp(string $ip): bool
     {
-        if (! config('firewall.use_database')) {
-            return [];
+        if (! $this->usesDatabaseStorage()) {
+            return false;
         }
 
         try {
-            return FirewallModel::query()->pluck('ip_address', 'ip_address')->all();
+            return FirewallModel::query()->where('ip_address', $ip)->exists();
+        } catch (\Throwable) {
+            return false;
+        }
+    }
+
+    private function getDatabaseIps(): array
+    {
+        if (! $this->usesDatabaseStorage()) {
+            return [];
+        }
+
+        if ($this->databaseIpsCache !== null) {
+            return $this->databaseIpsCache;
+        }
+
+        try {
+            $this->databaseIpsCache = FirewallModel::query()->pluck('ip_address', 'ip_address')->all();
+
+            return $this->databaseIpsCache;
         } catch (\Throwable) {
             return [];
+        }
+    }
+
+    private function usesDatabaseStorage(): bool
+    {
+        try {
+            return (bool) config('firewall.use_database', false);
+        } catch (\Throwable) {
+            return false;
         }
     }
 }
