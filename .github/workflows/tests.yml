@@ -26,10 +26,6 @@ jobs:
             laravel: '12.*'
             filament: '3.*'
             testbench: '10.*'
-          - php: '8.3'
-            laravel: '13.*'
-            filament: '3.*'
-            testbench: '11.*'
 
     name: PHP ${{ matrix.php }} / Laravel ${{ matrix.laravel }} / Filament ${{ matrix.filament }}
 

@@ -26,7 +26,7 @@ The `v0.1.x` maintenance lane is locked to Filament 3 and has this minimum basel
 - Laravel `10`
 - Filament `3`
 
-Supported majors for this lane are PHP `8.1-8.3`, Laravel `10-13`, and Filament `3.x`. Baseline changes must be decided before implementation work begins and then mirrored in the CI matrix.
+Supported majors for this lane are PHP `8.1-8.3`, Laravel `10-12`, and Filament `3.x`. Filament 3 does not support Laravel 13 (it requires `illuminate/support ^10.45|^11.0|^12.0`), so the backport lane caps at Laravel 12. Baseline changes must be decided before implementation work begins and then mirrored in the CI matrix.
 
 ### CI matrix (`v0.1.x`)
 
@@ -35,7 +35,6 @@ Supported majors for this lane are PHP `8.1-8.3`, Laravel `10-13`, and Filament 
 | 8.1 | 10      | 3        | 8         |
 | 8.2 | 11      | 3        | 9         |
 | 8.3 | 12      | 3        | 10        |
-| 8.3 | 13      | 3        | 11        |
 
 These combinations are executed in `.github/workflows/tests.yml` for pushes and pull requests on both `main` and `filament/v3`.
 
@@ -86,9 +85,9 @@ Backport lane dependency constraints (`filament/v3`) are:
 
 - `php`: `^8.1`
 - `magentron/laravel-firewall`: `^3.0`
-- `illuminate/support`: `^10.0|^11.0|^12.0|^13.0`
+- `illuminate/support`: `^10.0|^11.0|^12.0`
 - `filament/filament`: `^3.0` only (no `^4.0`)
-- `orchestra/testbench` (`require-dev`): `^8.0|^9.0|^10.0|^11.0`
+- `orchestra/testbench` (`require-dev`): `^8.0|^9.0|^10.0`
 - `phpunit/phpunit` (`require-dev`): `^10.0|^11.0`
 
 ## Installation
