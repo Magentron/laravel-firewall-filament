@@ -13,6 +13,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Filament 3 backport planning now defines explicit v3 adaptation constraints for action namespaces, slug signatures, static property typing, and v0.1.x Composer guardrails.
 - `v0.1.x` now has an executable compatibility baseline/matrix (PHP 8.1-8.3, Laravel 10-13, Filament 3) with mandatory domain pass criteria and a `filament/v3` release-gate workflow.
 
+## [0.1.x-backport] - 2026-04-23
+
+### Added
+- Published fixed-location backport release guidance at `docs/releases/v0.1.x-backport.md`, including scope, exclusions, upgrade/backport steps, known limitations, and links to the decision table and CI matrix.
+- Clarified README version-support mapping so `main` remains the Filament 4 release lane (`v0.2.0+`) while `filament/v3` remains the Filament 3 backport lane (`v0.1.x`).
+
 ## [0.1.0] - 2026-04-13
 
 ### Added

@@ -9,6 +9,15 @@ A [Filament](https://filamentphp.com/) admin panel integration for [magentron/la
 - Filament 3 or 4
 - [magentron/laravel-firewall](https://github.com/magentron/laravel-firewall) 3.x
 
+## Version support
+
+| Lane | Supported tags | Filament major | Policy |
+|---|---|---|---|
+| `main` | `v0.2.0+` | 4 | Mainline development and releases happen on `main` only. |
+| `filament/v3` | `v0.1.x` | 3 | Backports are released from `filament/v3` only. |
+
+Backport release guidance is maintained in `docs/releases/v0.1.x-backport.md`.
+
 ### Compatibility Baseline (`v0.1.x` / `filament/v3`)
 
 The `v0.1.x` maintenance lane is locked to Filament 3 and has this minimum baseline:
