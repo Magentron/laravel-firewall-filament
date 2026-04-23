@@ -131,6 +131,25 @@ The underlying `magentron/laravel-firewall` package supports two storage modes:
 
 Without this, the panel is view-only for rules. You can override this behaviour with `->allowConfigModeMutations()` on the plugin, but changes made in config mode will not persist across requests.
 
+## Firewall entry validation contract
+
+Firewall rule entry values accepted by the UI/API validator are:
+
+- IPv4 (example: `192.168.1.10`)
+- IPv6 (example: `2001:db8::1`)
+- IPv4 CIDR (example: `10.0.0.0/24`)
+- IPv6 CIDR (example: `2001:db8::/32`)
+- IPv4 range (example: `10.0.0.1-10.0.0.255`)
+- Country code selector (example: `country:US`)
+- Host pattern selector (example: `host:example.com`)
+
+Rejected patterns include:
+
+- Empty/whitespace-only values
+- Path-like inputs (for example `/etc/passwd`, `var/www/file.txt`)
+- Windows path forms (for example `C:\\Windows\\System32`)
+- Traversal-like values (for example `../secret`, `..\\secret`)
+
 ## Settings store
 
 When `->enableSettings()` is active, the plugin provides a UI to edit `firewall.enable_log` and `firewall.log_stack` at runtime. These values are stored in a JSON file (default: `storage/app/firewall-filament-settings.json`) and merged over the firewall config at boot.
@@ -182,6 +201,26 @@ FirewallFilamentPlugin::make()
     ->enableRuleCountsWidget(true)
     ->enableRecentLogLinesWidget(false);
 ```
+
+### Log viewer (best-effort)
+
+`magentron/laravel-firewall` does **not** persist structured access logs. This package can read recent `FIREWALL:` log lines from a Laravel log file when configured with both a target path and an allowlist:
+
+```php
+// config/firewall-filament.php
+return [
+    'log_file' => storage_path('logs/laravel.log'),
+    'log_file_allowlist' => [
+        storage_path('logs/laravel.log'),
+    ],
+];
+```
+
+Behaviour:
+
+- `log_file` must resolve (via `realpath()`) to one of the absolute entries in `log_file_allowlist`.
+- If the allowlist is empty or no entry matches, log reading is disabled and the plugin falls back to `NullLogSourceAdapter`.
+- The adapter scans only the tail of the file (256 KiB max), reads in binary mode, and truncates each line to 4 KiB.
 
 ## Publishing
 

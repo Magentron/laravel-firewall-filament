@@ -4,6 +4,7 @@ namespace Magentron\LaravelFirewallFilament\Tests\Feature;
 
 use Magentron\LaravelFirewallFilament\Adapters\ConfigRuleStoreAdapter;
 use Magentron\LaravelFirewallFilament\Adapters\DatabaseRuleStoreAdapter;
+use Magentron\LaravelFirewallFilament\Adapters\LaravelLogFileAdapter;
 use Magentron\LaravelFirewallFilament\Adapters\LogSourceAdapter;
 use Magentron\LaravelFirewallFilament\Adapters\NullLogSourceAdapter;
 use Magentron\LaravelFirewallFilament\Adapters\RuleStoreAdapter;
@@ -17,6 +18,7 @@ class ServiceProviderTest extends TestCase
     {
         $this->assertNotNull($this->app['config']->get('firewall-filament'));
         $this->assertArrayHasKey('log_file', $this->app['config']->get('firewall-filament'));
+        $this->assertArrayHasKey('log_file_allowlist', $this->app['config']->get('firewall-filament'));
         $this->assertArrayHasKey('settings_file', $this->app['config']->get('firewall-filament'));
     }
 
@@ -57,9 +59,28 @@ class ServiceProviderTest extends TestCase
     public function test_null_log_adapter_bound_when_no_log_file(): void
     {
         $this->app['config']->set('firewall-filament.log_file', null);
+        $this->app['config']->set('firewall-filament.log_file_allowlist', ['/tmp/laravel.log']);
 
         $adapter = $this->app->make(LogSourceAdapter::class);
         $this->assertInstanceOf(NullLogSourceAdapter::class, $adapter);
+    }
+
+    public function test_null_log_adapter_bound_when_allowlist_is_empty(): void
+    {
+        $this->app['config']->set('firewall-filament.log_file', '/tmp/laravel.log');
+        $this->app['config']->set('firewall-filament.log_file_allowlist', []);
+
+        $adapter = $this->app->make(LogSourceAdapter::class);
+        $this->assertInstanceOf(NullLogSourceAdapter::class, $adapter);
+    }
+
+    public function test_laravel_log_adapter_bound_when_path_and_allowlist_present(): void
+    {
+        $this->app['config']->set('firewall-filament.log_file', '/tmp/laravel.log');
+        $this->app['config']->set('firewall-filament.log_file_allowlist', ['/tmp/laravel.log']);
+
+        $adapter = $this->app->make(LogSourceAdapter::class);
+        $this->assertInstanceOf(LaravelLogFileAdapter::class, $adapter);
     }
 
     public function test_views_are_loaded(): void

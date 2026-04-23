@@ -40,9 +40,10 @@ class FirewallFilamentServiceProvider extends ServiceProvider
 
         $this->app->bind(LogSourceAdapter::class, function () {
             $logPath = config('firewall-filament.log_file');
+            $allowlist = (array) config('firewall-filament.log_file_allowlist', []);
 
-            if ($logPath !== null && $logPath !== '') {
-                return new LaravelLogFileAdapter($logPath);
+            if ($logPath !== null && $logPath !== '' && $allowlist !== []) {
+                return new LaravelLogFileAdapter($logPath, $allowlist);
             }
 
             return new NullLogSourceAdapter();

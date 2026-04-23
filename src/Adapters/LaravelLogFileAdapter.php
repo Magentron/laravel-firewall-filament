@@ -10,14 +10,50 @@ class LaravelLogFileAdapter implements LogSourceAdapter
     private const MAX_LINE_LENGTH = 4096;
     private const PREFIX = 'FIREWALL:';
 
+    private readonly ?string $resolvedPath;
+
+    /**
+     * @param array<int, string> $allowlist Absolute paths that are permitted.
+     */
     public function __construct(
-        private readonly string $logPath,
+        string $logPath,
+        array $allowlist = [],
     ) {
+        $this->resolvedPath = $this->resolveAgainstAllowlist($logPath, $allowlist);
     }
 
     public function supported(): bool
     {
-        return $this->logPath !== '' && is_file($this->logPath) && is_readable($this->logPath);
+        return $this->resolvedPath !== null
+            && is_file($this->resolvedPath)
+            && is_readable($this->resolvedPath);
+    }
+
+    private function resolveAgainstAllowlist(string $logPath, array $allowlist): ?string
+    {
+        if ($logPath === '' || $allowlist === []) {
+            return null;
+        }
+
+        $real = realpath($logPath);
+
+        if ($real === false) {
+            return null;
+        }
+
+        foreach ($allowlist as $allowed) {
+            if (! is_string($allowed) || $allowed === '') {
+                continue;
+            }
+
+            $allowedReal = realpath($allowed);
+
+            if ($allowedReal !== false && $allowedReal === $real) {
+                return $real;
+            }
+        }
+
+        return null;
     }
 
     public function recentEntries(int $limit): iterable
@@ -26,13 +62,13 @@ class LaravelLogFileAdapter implements LogSourceAdapter
             return new Collection();
         }
 
-        $fileSize = filesize($this->logPath);
+        $fileSize = filesize($this->resolvedPath);
 
         if ($fileSize === false || $fileSize === 0) {
             return new Collection();
         }
 
-        $handle = fopen($this->logPath, 'r');
+        $handle = fopen($this->resolvedPath, 'rb');
 
         if ($handle === false) {
             return new Collection();

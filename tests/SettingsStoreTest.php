@@ -210,6 +210,23 @@ class SettingsStoreTest extends TestCase
         $this->assertSame([], $store->get());
     }
 
+    public function test_get_filters_non_writable_keys_from_disk(): void
+    {
+        $store = $this->makeStore();
+
+        file_put_contents($this->settingsFile, json_encode([
+            'firewall.enable_log' => true,
+            'firewall.log_stack' => 'daily',
+            'firewall.use_database' => true,
+            'app.key' => 'unsafe',
+        ]));
+
+        $this->assertSame([
+            'firewall.enable_log' => true,
+            'firewall.log_stack' => 'daily',
+        ], $store->get());
+    }
+
     public function test_get_settings_file_path(): void
     {
         $store = $this->makeStore();

@@ -7,6 +7,17 @@ use PHPUnit\Framework\TestCase;
 
 class FirewallRuleValidationTest extends TestCase
 {
+    public function test_documented_contract_formats_are_accepted(): void
+    {
+        $this->assertTrue(FirewallEntryRule::isValid('203.0.113.10'));
+        $this->assertTrue(FirewallEntryRule::isValid('2001:db8::10'));
+        $this->assertTrue(FirewallEntryRule::isValid('203.0.113.0/24'));
+        $this->assertTrue(FirewallEntryRule::isValid('2001:db8::/32'));
+        $this->assertTrue(FirewallEntryRule::isValid('203.0.113.10-203.0.113.20'));
+        $this->assertTrue(FirewallEntryRule::isValid('country:NL'));
+        $this->assertTrue(FirewallEntryRule::isValid('host:example.com'));
+    }
+
     public function test_single_ipv4_is_valid(): void
     {
         $this->assertTrue(FirewallEntryRule::isValid('192.168.1.1'));
@@ -68,8 +79,10 @@ class FirewallRuleValidationTest extends TestCase
     {
         $this->assertFalse(FirewallEntryRule::isValid('/etc/passwd'));
         $this->assertFalse(FirewallEntryRule::isValid('/var/www/ips.txt'));
+        $this->assertFalse(FirewallEntryRule::isValid('var/www/ips.txt'));
         $this->assertFalse(FirewallEntryRule::isValid('./relative/path'));
         $this->assertFalse(FirewallEntryRule::isValid('../traversal'));
+        $this->assertFalse(FirewallEntryRule::isValid('..\\traversal'));
     }
 
     public function test_windows_paths_are_rejected(): void
